@@ -2,69 +2,257 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RakshaLink Responder Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     :root {
-      --bg: #EFEBDD; --surface: #FBF9F2; --green: #274706; --teal: #1B4D4F;
-      --navy: #2B3A67; --maroon: #5B1F2D; --amber: #D9B25C; --error: #BA1A1A;
+      --bg: #EFEBDD;
+      --surface: #FBF9F2;
+      --ink: #1C2A12;
+      --mute: #5E6B57;
+      --line: rgba(39,71,6,0.14);
+      --green: #274706;
+      --teal: #1B4D4F;
+      --navy: #2B3A67;
+      --maroon: #5B1F2D;
+      --purple: #3D2A5C;
+      --cream: #F5F3EA;
+      --amber: #D9B25C;
+      --error: #ba1a1a;
+      
       --font-serif: 'Noto Serif', Georgia, serif;
       --font-sans: 'DM Sans', system-ui, sans-serif;
+      --radius-card: 12px;
+      --radius-btn: 10px;
+      --radius-pill: 9999px;
     }
-    body { margin: 0; font-family: var(--font-sans); background: var(--bg); display: flex; flex-direction: column; height: 100vh; }
-    header { background: var(--green); color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
-    .demo-banner { background: var(--amber); color: #000; font-weight: bold; padding: 4px 12px; border-radius: 99px; font-size: 12px; }
+
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: var(--font-sans); 
+      background: var(--bg); 
+      color: var(--ink);
+      display: flex; 
+      flex-direction: column; 
+      height: 100vh; 
+      overflow: hidden;
+    }
+
+    /* Top Bar */
+    header { 
+      background: var(--green); 
+      color: var(--cream); 
+      height: 72px;
+      padding: 0 24px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      flex-shrink: 0;
+    }
+    .logo-area { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .logo-text { font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin: 0; }
+    .logo-sub { font-size: 13px; opacity: 0.8; }
+    
+    .demo-banner { 
+      background: var(--amber); 
+      color: #000; 
+      font-weight: 700; 
+      padding: 6px 16px; 
+      border-radius: var(--radius-pill); 
+      font-size: 12px; 
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 16px; }
+    .role-select { 
+      background: rgba(255,255,255,0.1); 
+      color: white; 
+      border: 1px solid rgba(255,255,255,0.3); 
+      padding: 6px 12px; 
+      border-radius: 6px; 
+      font-family: var(--font-sans);
+      outline: none;
+    }
+    .role-select option { color: #000; }
+    .toggle-duty { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+    .responder-chip { background: var(--surface); color: var(--green); font-weight: 700; padding: 6px 12px; border-radius: var(--radius-pill); font-size: 14px; }
+
+    /* Main Layout */
     .main-container { display: flex; flex: 1; overflow: hidden; }
-    .sidebar { width: 80px; background: var(--surface); border-right: 1px solid #ccc; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px;}
-    .queue { width: 320px; background: var(--surface); border-right: 1px solid #ccc; overflow-y: auto; padding: 16px; }
-    .detail { width: 400px; padding: 16px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; gap: 16px;}
-    .map-area { flex: 1; position: relative; }
-    #map { width: 100%; height: 100%; background: #ddd; }
-    .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    h1, h2, h3 { font-family: var(--font-serif); margin: 0; }
-    .btn { padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-align: center; }
-    .btn-green { background: var(--green); color: white; }
-    .btn-outline { border: 1px solid var(--error); color: var(--error); background: transparent; }
+
+    /* Sidebar */
+    .sidebar { 
+      width: 200px; 
+      background: var(--surface); 
+      border-right: 1px solid var(--line); 
+      padding: 24px 16px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .nav-item { padding: 12px 16px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; color: var(--mute); display: flex; justify-content: space-between; align-items: center; }
+    .nav-item.active { background: rgba(39,71,6,0.08); color: var(--green); }
+    .nav-item .coming-soon { font-size: 10px; font-weight: 700; background: var(--bg); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+
+    /* Queue */
+    .queue { 
+      width: 320px; 
+      background: var(--surface); 
+      border-right: 1px solid var(--line); 
+      display: flex; 
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .queue-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--line); }
+    .queue-header h3 { font-family: var(--font-serif); font-size: 20px; margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between; }
+    .queue-badge { background: var(--error); color: white; font-size: 12px; font-family: var(--font-sans); padding: 2px 8px; border-radius: 99px; }
+    
+    .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+    .filter-chip { background: var(--bg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--mute); }
+    .filter-chip.active { background: var(--green); color: white; border-color: var(--green); }
+
+    .queue-list { overflow-y: auto; flex: 1; padding: 12px; }
+    .q-card { background: #fff; border-radius: var(--radius-card); padding: 16px; margin-bottom: 12px; cursor: pointer; border: 1px solid var(--line); border-left: 4px solid transparent; transition: all 0.2s; }
+    .q-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .q-card.active { background: #f0f7eb; border-color: var(--green); border-left-color: var(--green); }
+    
+    .q-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    .q-title { font-family: var(--font-serif); font-size: 18px; margin: 0 0 8px 0; color: var(--ink); }
+    .q-meta { font-size: 13px; color: var(--mute); display: flex; flex-direction: column; gap: 4px; }
+    .q-trigger { display: inline-block; background: #eef2f6; color: var(--navy); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-bottom: 4px; }
+
+    /* Map */
+    .map-col { flex: 1; position: relative; background: #ddd; display: flex; flex-direction: column; }
+    #map { flex: 1; width: 100%; }
+
+    /* Detail Panel */
+    .detail { 
+      width: 400px; 
+      background: var(--bg); 
+      border-left: 1px solid var(--line); 
+      display: flex; 
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+    .detail-content { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    
+    .d-header { display: flex; flex-direction: column; gap: 8px; }
+    .d-title { font-family: var(--font-serif); font-size: 28px; margin: 0; color: var(--ink); }
+    .d-location { font-size: 15px; color: var(--mute); line-height: 1.5; }
+    .d-distance { font-size: 32px; font-weight: 700; color: var(--ink); margin-top: 8px; }
+    
+    .crash-box { background: rgba(43, 58, 103, 0.08); border-left: 4px solid var(--navy); padding: 16px; border-radius: 0 var(--radius-card) var(--radius-card) 0; }
+    .crash-box h4 { margin: 0 0 8px 0; color: var(--navy); font-size: 14px; display: flex; align-items: center; gap: 8px;}
+    .crash-box .unresponsive { font-weight: 700; color: var(--error); margin-bottom: 8px; font-size: 13px; }
+    .crash-box .stats { font-size: 13px; color: var(--mute); }
+    
+    .btn { padding: 16px; border-radius: var(--radius-btn); font-family: var(--font-sans); font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; border: none; width: 100%; transition: opacity 0.2s; display: block; }
+    .btn:active { transform: scale(0.98); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .chip { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
-    .row { display: flex; justify-content: space-between; align-items: center; }
+    .btn-green { background: var(--green); color: white; }
+    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: transparent; }
+    .btn-outline-grey { border: 2px solid var(--mute); color: var(--mute); background: transparent; }
+    .btn-grey-fill { background: #e0e4db; color: var(--mute); }
+    
+    .countdown-box { background: rgba(186, 26, 26, 0.08); border: 1px solid rgba(186, 26, 26, 0.2); color: var(--error); padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+
+    .card { background: white; border-radius: var(--radius-card); padding: 20px; border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+    .card h3 { font-family: var(--font-sans); font-size: 16px; margin: 0 0 16px 0; color: var(--ink); }
+    
+    .progress-step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--mute); font-size: 14px; font-weight: 500; }
+    .progress-step:last-child { margin-bottom: 0; }
+    .progress-step.checked { color: var(--ink); }
+    .p-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; }
+    .progress-step.checked .p-icon { border-color: var(--green); background: var(--green); }
+    .progress-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
+
+    .eta-box { font-size: 14px; color: var(--mute); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+    
+    .log-strip { background: var(--surface); padding: 12px 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--mute); display: flex; gap: 24px; font-family: monospace; }
   </style>
 </head>
 <body>
   <header>
-    <div>
-      <h2 style="margin:0;">RakshaLink</h2>
-      <small>Help, when you need it most.</small>
+    <div class="logo-area">
+      <div class="logo-icon">RL</div>
+      <div>
+        <h1 class="logo-text">RakshaLink</h1>
+        <div class="logo-sub">Help, when you need it most.</div>
+      </div>
     </div>
     <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
-    <div>
-      <select id="role-select"><option value="">View as...</option></select>
-      <label><input type="checkbox" id="duty-toggle" checked> On duty</label>
-      <button id="sound-btn">Enable sound</button>
+    <div class="header-actions">
+      <select class="role-select" id="role-select">
+        <option value="">View as...</option>
+      </select>
+      <label class="toggle-duty">
+        <input type="checkbox" id="duty-toggle" checked> On duty
+      </label>
+      <div class="responder-chip" id="my-name">Guest</div>
     </div>
   </header>
+
   <div class="main-container">
-    <div class="sidebar">
-      <div>Home</div>
-      <div style="opacity:0.5; font-size:10px;">History<br>(Coming soon)</div>
-    </div>
+    <aside class="sidebar">
+      <div class="nav-item active">Home</div>
+      <div class="nav-item">History <span class="coming-soon">Coming soon</span></div>
+      <div class="nav-item">Profile <span class="coming-soon">Coming soon</span></div>
+      <div class="nav-item">Settings <span class="coming-soon">Coming soon</span></div>
+    </aside>
+
     <div class="queue" id="queue">
-      <h3>Live alert queue</h3>
-      <div id="queue-list"></div>
+      <div class="queue-header">
+        <h3>Live alert queue <span class="queue-badge" id="q-count">0</span></h3>
+        <div class="filter-chips">
+          <div class="filter-chip active">All</div>
+          <div class="filter-chip">Medical</div>
+          <div class="filter-chip">Accident</div>
+        </div>
+      </div>
+      <div class="queue-list" id="queue-list">
+        <!-- Rendered by JS -->
+      </div>
     </div>
+
+    <div class="map-col">
+      <div id="map"></div>
+      <div class="log-strip" id="log-strip">
+        System active. Standing by.
+      </div>
+    </div>
+
     <div class="detail" id="detail">
       <!-- Rendered by JS -->
     </div>
-    <div class="map-area">
-      <div id="map"></div>
-    </div>
   </div>
-  
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    let state = { events: [], responders: [], selectedId: null, role: null, soundEnabled: false };
-    let map, markerRider, markerResp, line;
+    const COLORS = {
+      medical: 'var(--maroon)',
+      accident: 'var(--navy)',
+      breakdown: 'var(--teal)',
+      fuel: 'var(--green)'
+    };
     
+    const TITLES = {
+      medical: 'Medical SOS',
+      accident: 'Road Accident',
+      breakdown: 'Vehicle Breakdown',
+      fuel: 'Fuel Shortage'
+    };
+
+    let state = { events: [], responders: [], selectedId: null, role: null };
+    let map, markerRider, markerResp, line;
+
     function initMap() {
       map = L.map('map').setView([22.695, 88.378], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -74,7 +262,7 @@
 
     async function fetchData() {
       const evRes = await fetch('/api/events');
-      state.events = await evRes.json();
+      state.events = (await evRes.json()).sort((a,b)=>b.created_at - a.created_at);
       const respRes = await fetch('/api/responders');
       state.responders = await respRes.json();
       
@@ -91,86 +279,150 @@
 
     function connectSSE() {
       const evtSource = new EventSource('/api/stream');
-      evtSource.onmessage = (e) => fetchData(); // Simplistic: refetch on any event
-      evtSource.onerror = () => setTimeout(fetchData, 3000); // 3s polling fallback
+      evtSource.onmessage = () => fetchData();
+      evtSource.onerror = () => setTimeout(fetchData, 3000);
+    }
+
+    function timeAgo(ms) {
+      const mins = Math.floor((Date.now() - ms) / 60000);
+      if (mins < 1) return 'Just now';
+      return `${mins} min ago`;
     }
 
     function render() {
+      // Update Role UI
+      const me = state.responders.find(r => r.id === state.role);
+      document.getElementById('my-name').textContent = me ? me.name : 'Guest';
+      
+      // Render Queue
       const qList = document.getElementById('queue-list');
+      document.getElementById('q-count').textContent = state.events.filter(e=>!e.steps.resolved).length;
       qList.innerHTML = '';
+      
       state.events.forEach(ev => {
+        const isActive = ev.id === state.selectedId;
+        const color = COLORS[ev.category];
+        const title = TITLES[ev.category];
+        const dist = (ev.dispatches || []).find(d=>d.responderId===state.role)?.distance_m;
+        const distText = dist ? `${(dist/1000).toFixed(1)} km` : 'Distance unknown';
+        
         const div = document.createElement('div');
-        div.className = 'card';
-        div.style.marginTop = '12px';
-        div.style.cursor = 'pointer';
-        div.innerHTML = `<strong>${ev.category.toUpperCase()}</strong><br>Sample location`;
+        div.className = `q-card ${isActive ? 'active' : ''}`;
         div.onclick = () => { state.selectedId = ev.id; render(); };
+        
+        div.innerHTML = `
+          <div class="q-cat" style="background:${color}20; color:${color};">${ev.category}</div>
+          <h4 class="q-title">${title}</h4>
+          <div class="q-meta">
+            ${ev.trigger === 'crash_auto' ? `<span class="q-trigger">Automatic crash alert</span>` : ''}
+            <span>${distText} • ${timeAgo(ev.created_at)}</span>
+            <span>Sample location</span>
+          </div>
+        `;
         qList.appendChild(div);
       });
 
+      // Render Detail
       const detail = document.getElementById('detail');
-      if (!state.selectedId) { detail.innerHTML = '<p>Select an alert</p>'; return; }
+      if (!state.selectedId) { 
+        detail.innerHTML = '<div style="padding:24px;color:var(--mute);text-align:center;">Select an alert from the queue to view details.</div>'; 
+        if (markerRider) { map.removeLayer(markerRider); markerRider=null; }
+        if (markerResp) { map.removeLayer(markerResp); markerResp=null; }
+        if (line) { map.removeLayer(line); line=null; }
+        return; 
+      }
+      
       const ev = state.events.find(e => e.id === state.selectedId);
       if (!ev) return;
 
       const myDispatch = state.role ? (ev.dispatches || []).find(d => d.responderId === state.role) : null;
+      
       let uiState = 'S0';
       if (ev.steps.resolved) uiState = 'S4';
       else if (ev.steps.arrived) uiState = 'S3';
       else if (ev.steps.enroute) uiState = 'S2';
       else if (ev.steps.accepted) uiState = 'S1';
 
-      let html = `<div class="card">
-        <h2>${ev.category}</h2>
-        <p>${ev.lat}, ${ev.lng} (Sample location)</p>
+      const color = COLORS[ev.category];
+
+      let html = `<div class="detail-content">
+        <div class="d-header">
+          <div class="q-cat" style="background:${color}20; color:${color}; align-self:flex-start;">${ev.category}</div>
+          <h2 class="d-title">${TITLES[ev.category]}</h2>
+          <div class="d-location">${ev.lat}, ${ev.lng}<br>GNIT Campus, Sodepur (demo)</div>
+          ${myDispatch ? `<div class="d-distance">${(myDispatch.distance_m/1000).toFixed(1)} km <span style="font-size:14px; font-weight:400; color:var(--mute)">straight-line</span></div>` : ''}
+        </div>
       `;
 
       if (ev.trigger === 'crash_auto') {
-        html += `<div style="background:lightblue; padding:8px;">Automatic crash alert. Victim may be unresponsive. ${ev.peak_g}g, ${ev.pre_impact_kmh}km/h (sample values)</div>`;
-      }
-
-      if (uiState === 'S0' && myDispatch && myDispatch.status === 'pending') {
-        html += `<div style="background:pink; padding:8px; margin-top:10px;">Escalates in 00:20</div>
-                 <button class="btn btn-green" onclick="acceptAlert('${myDispatch.token}')">Accept alert</button>
-                 <button class="btn btn-outline" onclick="declineAlert('${myDispatch.token}')">Can't respond</button>
-                 <button onclick="prompt('Copy this link:', '${window.location.origin}/r/${myDispatch.token}')">DEMO Copy accept link</button>`;
-      } else if (uiState !== 'S0') {
-        html += `<div class="chip" style="background:var(--green); color:white;">Alert ${uiState}</div>`;
-      }
-
-      html += `</div><div class="card"><h3>Progress</h3>
-        <div><input type="checkbox" checked disabled> Notified</div>
-        <div><input type="checkbox" ${ev.steps.accepted?'checked':''} disabled> Accepted</div>
-        <div><input type="checkbox" ${ev.steps.enroute?'checked':''} disabled> On the way</div>
-        <div><input type="checkbox" ${ev.steps.arrived?'checked':''} disabled> Arrived</div>
-        <div><input type="checkbox" ${ev.steps.resolved?'checked':''} disabled> Resolved</div>
-        <p>Your estimate: ${ev.responder_eta_minutes ? ev.responder_eta_minutes + ' min' : 'Not available yet'}</p>
-      </div>`;
-
-      if (myDispatch && ev.steps.accepted && !ev.steps.resolved) {
-        html += `<div class="card"><h3>Actions</h3>
-          <button class="btn btn-green" ${uiState==='S1'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'enroute')">On my way</button>
-          <button class="btn btn-green" ${uiState==='S2'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'arrived')">Arrived</button>
-          <button class="btn btn-green" ${uiState==='S3'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'resolved')">Resolved</button>
+        html += `
+        <div class="crash-box">
+          <h4>Automatic crash alert</h4>
+          <div class="unresponsive">Victim may be unresponsive.</div>
+          <div class="stats">Peak impact ${ev.peak_g} g • Speed before ${ev.pre_impact_kmh} km/h (sample)</div>
         </div>`;
       }
 
+      if (uiState === 'S0' && myDispatch && myDispatch.status === 'pending') {
+        html += `
+        <div>
+          <div class="countdown-box">Escalates in 00:20</div>
+          <div style="display:flex; gap:12px; margin-bottom:12px;">
+            <button class="btn btn-green" onclick="acceptAlert('${myDispatch.token}')">Accept alert</button>
+            <button class="btn btn-outline-red" style="width:auto; padding:16px 24px;" onclick="declineAlert('${myDispatch.token}')">Can't respond</button>
+          </div>
+          <button class="btn btn-outline-grey" style="font-size:13px; padding:10px;" onclick="prompt('Simulate SMS accept link:', '${window.location.origin}/r/${myDispatch.token}')">Copy accept link (Demo)</button>
+        </div>`;
+      }
+
+      html += `
+        <div class="card">
+          <h3>Response progress</h3>
+          <div class="progress-step checked"><div class="p-icon"></div> Notified</div>
+          <div class="progress-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
+          <div class="progress-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
+          <div class="progress-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
+          <div class="progress-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
+          <div class="eta-box">
+            Responder's estimate: <strong>${ev.responder_eta_minutes ? ev.responder_eta_minutes + ' min' : 'Not available yet'}</strong>
+          </div>
+        </div>
+      `;
+
+      if (myDispatch && ev.steps.accepted && !ev.steps.resolved) {
+        html += `
+        <div class="card">
+          <h3>Update status</h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn ${uiState==='S1'?'btn-green':'btn-grey-fill'}" ${uiState==='S1'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'enroute')">On my way</button>
+            <button class="btn ${uiState==='S2'?'btn-green':'btn-grey-fill'}" ${uiState==='S2'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'arrived')">Arrived</button>
+            <button class="btn ${uiState==='S3'?'btn-green':'btn-grey-fill'}" ${uiState==='S3'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'resolved')">Resolved</button>
+          </div>
+        </div>`;
+      } else if (ev.steps.resolved) {
+        html += `
+        <div style="display:flex; gap:12px;">
+          <button class="btn btn-grey-fill" disabled>✓ Resolved</button>
+          <button class="btn btn-outline-grey" onclick="state.selectedId=null; render()">Back to alerts</button>
+        </div>`;
+      }
+
+      html += `</div>`;
       detail.innerHTML = html;
 
-      // Update map
+      // Update Map
       try {
         if (markerRider) map.removeLayer(markerRider);
         markerRider = L.marker([ev.lat, ev.lng]).addTo(map);
-        if (state.role) {
-          const r = state.responders.find(x => x.id === state.role);
-          if (r) {
-            if (markerResp) map.removeLayer(markerResp);
-            markerResp = L.marker([r.lat, r.lng]).addTo(map);
-            if (line) map.removeLayer(line);
-            line = L.polyline([[ev.lat, ev.lng], [r.lat, r.lng]], {color: 'red', dashArray: '5, 5'}).addTo(map);
-            map.fitBounds(line.getBounds());
-          }
+        if (state.role && me) {
+          if (markerResp) map.removeLayer(markerResp);
+          markerResp = L.marker([me.lat, me.lng]).addTo(map);
+          if (line) map.removeLayer(line);
+          line = L.polyline([[ev.lat, ev.lng], [me.lat, me.lng]], {color: 'red', dashArray: '5, 5'}).addTo(map);
+          map.fitBounds(line.getBounds(), {padding: [50,50]});
         } else {
+          if (markerResp) { map.removeLayer(markerResp); markerResp=null; }
+          if (line) { map.removeLayer(line); line=null; }
           map.setView([ev.lat, ev.lng], 14);
         }
       } catch (e) {
@@ -182,14 +434,25 @@
           <circle cx="80%" cy="20%" r="6" fill="var(--green)" />
         </svg>`;
       }
+      
+      // Update Log
+      let logText = `SOS ${ev.id.substring(0,8)} created.`;
+      if (ev.steps.notified) logText += ` | Responders notified.`;
+      if (ev.steps.accepted) logText += ` | Alert accepted.`;
+      if (ev.steps.enroute) logText += ` | On the way.`;
+      if (ev.steps.arrived) logText += ` | Arrived.`;
+      if (ev.steps.resolved) logText += ` | Resolved.`;
+      document.getElementById('log-strip').textContent = logText;
     }
 
     async function acceptAlert(token) { await fetch('/api/r/'+token+'/accept', {method:'POST'}); fetchData(); }
-    async function declineAlert(token) { await fetch('/api/r/'+token+'/decline', {method:'POST'}); fetchData(); }
+    async function declineAlert(token) { await fetch('/api/r/'+token+'/decline', {method:'POST'}); state.selectedId=null; fetchData(); }
     async function updateStatus(token, step) { await fetch('/api/r/'+token+'/status', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({step})}); fetchData(); }
 
     document.getElementById('role-select').onchange = (e) => { state.role = e.target.value; render(); };
-    document.getElementById('sound-btn').onclick = () => { state.soundEnabled = true; alert('Sound enabled'); };
+    document.getElementById('duty-toggle').onchange = async (e) => {
+      if (state.role) await fetch('/api/responders/'+state.role+'/duty', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({on_duty:e.target.checked})});
+    };
 
     initMap();
     fetchData();

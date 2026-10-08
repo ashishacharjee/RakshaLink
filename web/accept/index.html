@@ -1,51 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>RakshaLink - Accept Alert</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>RakshaLink Responder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #EFEBDD; --surface: #FBF9F2; --green: #274706; --teal: #1B4D4F;
-      --navy: #2B3A67; --maroon: #5B1F2D; --amber: #D9B25C; --error: #BA1A1A;
+      --bg: #EFEBDD;
+      --surface: #FBF9F2;
+      --ink: #1C2A12;
+      --mute: #5E6B57;
+      --line: rgba(39,71,6,0.14);
+      --green: #274706;
+      --teal: #1B4D4F;
+      --navy: #2B3A67;
+      --maroon: #5B1F2D;
+      --amber: #D9B25C;
+      --error: #ba1a1a;
       --font-serif: 'Noto Serif', Georgia, serif;
       --font-sans: 'DM Sans', system-ui, sans-serif;
     }
-    body { margin: 0; padding: 20px; font-family: var(--font-sans); background: var(--bg); display: flex; flex-direction: column; align-items: center; }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      padding: 16px; 
+      font-family: var(--font-sans); 
+      background: var(--bg); 
+      color: var(--ink);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
     .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
-    header { text-align: center; margin-bottom: 20px; }
-    .demo-banner { background: var(--amber); color: #000; font-weight: bold; padding: 8px; border-radius: 99px; font-size: 12px; text-align: center; margin-bottom: 16px; }
-    .card { background: var(--surface); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    h2 { font-family: var(--font-serif); margin: 0 0 8px 0; color: var(--navy); }
-    .btn { padding: 16px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; text-align: center; width: 100%; display: block; margin-bottom: 12px; }
+    
+    header { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .logo-icon { width: 24px; height: 24px; background: var(--green); color: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px;}
+    .header-text { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; gap: 6px; }
+    .header-sub { color: var(--mute); font-weight: 500; }
+    
+    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 6px 12px; border-radius: 99px; font-size: 11px; text-align: center; letter-spacing: 0.5px; margin-bottom: 8px; }
+    
+    .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--line); }
+    .overline { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--mute); margin-bottom: 12px; letter-spacing: 1px; }
+    
+    .hero { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 16px; }
+    .hero-icon { width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 12px; font-size: 20px;}
+    .hero-title { font-family: var(--font-serif); font-size: 26px; margin: 0 0 8px 0; color: var(--ink); }
+    .chip { background: #eef2f6; color: var(--navy); font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block;}
+    
+    .crash-box { background: rgba(43, 58, 103, 0.08); border-left: 4px solid var(--navy); padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 16px; text-align: left; }
+    .crash-box h4 { margin: 0 0 4px 0; color: var(--navy); font-size: 14px; }
+    .crash-box p { margin: 0 0 4px 0; font-size: 13px; color: var(--mute); }
+    .crash-box .unresponsive { font-weight: 700; color: var(--error); margin-bottom: 4px; }
+    .crash-box .sample-tag { font-size: 10px; opacity: 0.7; background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 4px; margin-left: 4px; }
+
+    .loc-card { text-align: left; margin-bottom: 16px; }
+    .loc-card h4 { margin: 0 0 4px 0; font-size: 14px; color: var(--ink); }
+    .loc-card p { margin: 0 0 12px 0; font-size: 14px; color: var(--mute); }
+    .dist-val { font-size: 20px; font-weight: 700; color: var(--ink); }
+
+    .btn { padding: 16px; border-radius: 12px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-sans); }
+    .btn-white { background: #fff; color: var(--ink); border: 1px solid var(--line); }
     .btn-green { background: var(--green); color: white; }
-    .btn-outline { border: 2px solid var(--error); color: var(--error); background: transparent; }
-    .btn:disabled { opacity: 0.5; }
-    .input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 16px; box-sizing: border-box; }
-    footer { text-align: center; font-size: 12px; color: #666; margin-top: 20px; }
+    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: transparent; }
+    .btn-disabled { background: #e0e4db; color: var(--mute); cursor: not-allowed; }
+
+    .countdown-box { background: rgba(186, 26, 26, 0.08); color: var(--error); padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 14px; margin: 16px 0; border: 1px solid rgba(186,26,26,0.1); }
+    
+    .status-banner { padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .status-banner.green { background: #e2f4cf; color: var(--green); }
+    
+    .progress-card { background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--line); }
+    .p-step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; color: var(--mute); font-weight: 500; }
+    .p-step:last-child { margin-bottom: 0; }
+    .p-step.checked { color: var(--ink); }
+    .p-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; }
+    .p-step.checked .p-icon { border-color: var(--green); background: var(--green); }
+    .p-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
+
+    .input-field { width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 15px; margin-bottom: 16px; box-sizing: border-box; font-family: var(--font-sans); }
+    
+    footer { text-align: center; font-size: 12px; color: var(--mute); margin-top: 16px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
     <header>
-      <h3>RakshaLink Responder</h3>
+      <div class="logo-icon">RL</div>
+      <div class="header-text">RakshaLink <span class="header-sub">Responder</span></div>
     </header>
-    <div id="content">Loading...</div>
+    
+    <div id="content" style="width: 100%;">
+      <div style="text-align:center; padding: 40px; color: var(--mute);">Loading...</div>
+    </div>
+    
     <footer>Opened from an SMS link. No app needed.</footer>
   </div>
 
   <script>
+    const COLORS = { medical: 'var(--maroon)', accident: 'var(--navy)', breakdown: 'var(--teal)', fuel: 'var(--green)' };
+    const TITLES = { medical: 'Medical SOS', accident: 'Road Accident', breakdown: 'Vehicle Breakdown', fuel: 'Fuel Shortage' };
+    const ICONS = { medical: '✚', accident: '🚗', breakdown: '🔧', fuel: '⛽' };
+
     const token = window.location.pathname.split('/').pop();
     let state = null;
+    let dispatch = null;
 
     async function fetchData() {
       const res = await fetch(`/api/r/${token}`);
       if (res.status === 403) {
-        document.getElementById('content').innerHTML = '<div class="card" style="text-align:center;"><h2>Link Expired</h2><p>This alert is no longer active.</p></div>';
+        document.getElementById('content').innerHTML = `
+          <div class="card" style="text-align:center; padding: 40px 20px;">
+            <div style="font-size:32px; margin-bottom:12px;">⚠️</div>
+            <h2 style="font-family:var(--font-serif); color:var(--ink); margin:0 0 8px 0;">Link Expired</h2>
+            <p style="color:var(--mute); margin:0; font-size:14px;">This alert has been handled or escalated.</p>
+          </div>`;
         return;
       }
       const data = await res.json();
       state = data.event;
+      dispatch = data.dispatch;
       render();
     }
 
@@ -60,50 +138,99 @@
       else if (ev.steps.unanswered) uiState = 'Expired';
 
       if (uiState === 'Expired') {
-        document.getElementById('content').innerHTML = '<div class="card" style="text-align:center;"><h2>Alert Closed</h2><p>This alert was handled or escalated.</p></div>';
+        document.getElementById('content').innerHTML = `
+          <div class="card" style="text-align:center; padding: 40px 20px;">
+            <h2 style="font-family:var(--font-serif); color:var(--ink); margin:0 0 8px 0;">Alert Closed</h2>
+            <p style="color:var(--mute); margin:0; font-size:14px;">This alert was escalated or closed.</p>
+          </div>`;
         return;
       }
 
-      let html = `<div class="card">
-        <small style="font-weight:bold; color:#666;">INCOMING ALERT</small>
-        <h2>${ev.category.toUpperCase()}</h2>
-        <p>${ev.lat}, ${ev.lng}</p>
-        <button class="btn btn-outline" style="border-color:#ccc; color:#000;" onclick="window.open('https://www.openstreetmap.org/?mlat=${ev.lat}&mlon=${ev.lng}#map=15/${ev.lat}/${ev.lng}')">Open in Maps</button>
+      const color = COLORS[ev.category];
+      const distText = dispatch ? `${(dispatch.distance_m/1000).toFixed(1)} km` : 'Distance unknown';
+
+      let html = `<div class="card" style="margin-bottom:16px;">`;
+      
+      if (uiState === 'S0') {
+        html += `<div class="overline">Incoming Alert</div>`;
+      } else if (uiState === 'S1') {
+        html += `<div class="status-banner green">✓ Alert accepted</div>`;
+      } else if (uiState === 'S2') {
+        html += `<div class="status-banner green">On the way</div>`;
+      } else if (uiState === 'S3') {
+        html += `<div class="status-banner green">Arrived</div>`;
+      } else if (uiState === 'S4') {
+        html += `<div class="status-banner green">✓ Resolved</div>`;
+      }
+
+      html += `
+        <div class="hero">
+          <div class="hero-icon" style="background:${color}">${ICONS[ev.category]}</div>
+          <h2 class="hero-title">${TITLES[ev.category]}</h2>
+          ${ev.trigger === 'crash_auto' ? `<div class="chip">Automatic crash</div>` : ''}
+        </div>
+      `;
+
+      if (ev.trigger === 'crash_auto') {
+        html += `
+        <div class="crash-box">
+          <h4>Automatic crash alert</h4>
+          <p>Hard impact and sudden stop detected.</p>
+          <div class="unresponsive">Victim may be unresponsive.</div>
+          <p>Peak impact ${ev.peak_g} g • Speed before ${ev.pre_impact_kmh} km/h <span class="sample-tag">sample</span></p>
+        </div>`;
+      }
+
+      html += `
+        <div class="loc-card">
+          <h4>Victim location</h4>
+          <p>GNIT campus, Sodepur (demo)</p>
+          <div class="dist-val">${distText} <span style="font-size:13px; font-weight:400; color:var(--mute);">straight-line</span></div>
+        </div>
+        <button class="btn btn-white" onclick="window.open('https://www.openstreetmap.org/?mlat=${ev.lat}&mlon=${ev.lng}#map=15/${ev.lat}/${ev.lng}')">Open in Maps ↗</button>
       </div>`;
 
       if (uiState === 'S0') {
         html += `
-          <div style="background:pink; color:red; padding:12px; border-radius:8px; text-align:center; font-weight:bold; margin-bottom:16px;">
-            Escalates to next responder in 00:20
+          <div class="countdown-box">Escalates to the next responder in <span style="color:red">00:20</span></div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <button class="btn btn-green" onclick="action('accept')">✓ Accept alert</button>
+            <button class="btn btn-outline-red" onclick="action('decline')">Can't respond</button>
           </div>
-          <button class="btn btn-green" onclick="action('accept')">Accept alert</button>
-          <button class="btn btn-outline" onclick="action('decline')">Can't respond</button>
         `;
-      } else if (uiState === 'S1') {
+      } else {
         html += `
-          <div class="card">
-            <h3 style="color:var(--green)">Alert Accepted</h3>
-            <input type="number" id="eta" class="input" placeholder="Your estimate (optional) - e.g. 15 min">
-            <button class="btn btn-green" onclick="action('status', 'enroute')">On my way</button>
+          <div class="progress-card">
+            <h4 style="margin:0 0 16px 0; font-size:14px; color:var(--ink);">Response progress</h4>
+            <div class="p-step checked"><div class="p-icon"></div> Notified</div>
+            <div class="p-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
+            <div class="p-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
+            <div class="p-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
+            <div class="p-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
           </div>
         `;
-      } else if (uiState === 'S2') {
-        html += `<button class="btn btn-green" onclick="action('status', 'arrived')">Arrived</button>`;
-      } else if (uiState === 'S3') {
-        html += `<button class="btn btn-green" onclick="action('status', 'resolved')">Resolved</button>`;
-      } else if (uiState === 'S4') {
-        html += `
-          <div class="card" style="text-align:center; color:var(--green);">
-            <h2>Resolved</h2>
-            <p>Thank you for your service.</p>
-          </div>
-          <button class="btn btn-outline" disabled>Back to alerts</button>
-        `;
+
+        if (uiState === 'S1') {
+          html += `
+            <input type="number" id="eta" class="input-field" placeholder="Your estimate (optional) - e.g. 8 min">
+            <button class="btn btn-green" onclick="action('status', 'enroute')">🚗 On my way</button>
+          `;
+        } else if (uiState === 'S2') {
+          html += `<button class="btn btn-green" onclick="action('status', 'arrived')">📍 Arrived</button>`;
+        } else if (uiState === 'S3') {
+          html += `<button class="btn btn-green" onclick="action('status', 'resolved')">✓ Resolved</button>`;
+        } else if (uiState === 'S4') {
+          html += `
+            <button class="btn btn-disabled" disabled>✓ Resolved</button>
+            <button class="btn btn-white" style="margin-top:12px;" disabled>Back to alerts</button>
+          `;
+        }
       }
       document.getElementById('content').innerHTML = html;
     }
 
     async function action(type, step = null) {
+      const b = event.target; b.style.opacity = '0.5';
       if (type === 'accept' || type === 'decline') {
         await fetch(`/api/r/${token}/${type}`, { method: 'POST' });
       } else if (type === 'status') {
@@ -118,7 +245,7 @@
     }
 
     fetchData();
-    setInterval(fetchData, 3000); // Poll for updates
+    setInterval(fetchData, 3000);
   </script>
 </body>
 </html>

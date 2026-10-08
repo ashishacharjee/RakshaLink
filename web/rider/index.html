@@ -1,51 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>RakshaLink - Rider App</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>RakshaLink Rider App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #EFEBDD; --surface: #FBF9F2; --green: #274706; --teal: #1B4D4F;
-      --navy: #2B3A67; --maroon: #5B1F2D; --amber: #D9B25C; --error: #BA1A1A;
+      --bg: #EFEBDD;
+      --surface: #FBF9F2;
+      --ink: #1C2A12;
+      --mute: #5E6B57;
+      --line: rgba(39,71,6,0.14);
+      --green: #274706;
+      --teal: #1B4D4F;
+      --navy: #2B3A67;
+      --maroon: #5B1F2D;
+      --amber: #D9B25C;
+      --error: #ba1a1a;
       --font-serif: 'Noto Serif', Georgia, serif;
       --font-sans: 'DM Sans', system-ui, sans-serif;
     }
-    body { margin: 0; padding: 20px; font-family: var(--font-sans); background: var(--bg); display: flex; flex-direction: column; align-items: center; }
-    .container { width: 100%; max-width: 400px; }
-    header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-    .logo { background: var(--green); color: white; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .title { font-family: var(--font-serif); font-size: 24px; margin: 0; }
-    .demo-banner { background: var(--amber); color: #000; font-weight: bold; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; margin-bottom: 24px; }
-    .card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .preset-toggle { display: flex; background: #e0dcca; border-radius: 8px; overflow: hidden; margin-top: 12px; }
-    .preset-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: bold; cursor: pointer; }
-    .preset-btn.active { background: white; border-radius: 6px; margin: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .tile { background: white; padding: 24px 16px; border-radius: 16px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .tile-medical { color: var(--maroon); } .tile-accident { color: var(--navy); }
-    .tile-breakdown { color: var(--teal); } .tile-fuel { color: var(--green); }
-    .btn-112 { background: var(--error); color: white; width: 100%; padding: 16px; border-radius: 12px; font-size: 18px; font-weight: bold; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; text-decoration: none; box-sizing: border-box;}
-    .tracker { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .step { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; }
-    .circle.active { border-color: var(--green); background: var(--green); }
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      padding: 20px; 
+      font-family: var(--font-sans); 
+      background: var(--bg); 
+      color: var(--ink);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+    .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; }
+    
+    header { display: flex; align-items: center; gap: 12px; }
+    .logo-icon { width: 40px; height: 40px; background: var(--green); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;}
+    .title { font-family: var(--font-serif); font-size: 24px; font-weight: 600; margin: 0; color: var(--ink); }
+    .subtitle { color: var(--mute); font-weight: 500; font-size: 14px; }
+    
+    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; letter-spacing: 0.5px; }
+
+    .card { background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid var(--line); }
+    .loc-title { font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .loc-val { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+    
+    .preset-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 4px; }
+    .preset-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--mute); font-family: var(--font-sans); border-radius: 6px; transition: 0.2s; }
+    .preset-btn.active { background: #fff; color: var(--ink); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .tile { 
+      background: #fff; 
+      border: 1px solid var(--line); 
+      border-radius: 16px; 
+      padding: 24px 16px; 
+      cursor: pointer; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 12px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      transition: 0.2s;
+    }
+    .tile:active { transform: scale(0.96); }
+    .tile-icon { font-size: 32px; }
+    .tile-label { font-family: var(--font-sans); font-size: 16px; font-weight: 700; }
+    .tile-medical { color: var(--maroon); }
+    .tile-accident { color: var(--navy); }
+    .tile-breakdown { color: var(--teal); }
+    .tile-fuel { color: var(--green); }
+
+    .btn-112 { background: var(--error); color: white; width: 100%; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: 700; font-family: var(--font-sans); border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 12px rgba(186,26,26,0.2); }
+    
+    /* Tracker */
+    .tracker { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); border: 1px solid var(--line); }
+    .tracker-title { font-family: var(--font-serif); font-size: 24px; margin: 0 0 24px 0; color: var(--green); text-align: center; }
+    
+    .step { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 16px; font-weight: 600; color: var(--mute); }
+    .step.active { color: var(--ink); }
+    .circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step.active .circle { border-color: var(--green); background: var(--green); }
+    .step.active .circle::after { content: '✓'; color: white; font-size: 14px; }
+    
+    #unanswered-text { color: var(--error); font-weight: 700; text-align: center; margin: 20px 0; font-size: 18px; }
+    
+    .btn-outline { padding: 16px; width: 100%; border-radius: 12px; border: 2px solid var(--line); background: transparent; font-family: var(--font-sans); font-size: 16px; font-weight: 700; color: var(--ink); cursor: pointer; }
+
+    /* Drive Mode */
+    .drive-mode { background: #eef2f6; border: 1px solid rgba(43,58,103,0.1); text-align: center; }
+    .drive-mode h3 { margin: 0 0 16px 0; color: var(--navy); font-size: 18px; font-family: var(--font-serif); }
+    .select-input { width: 100%; padding: 12px; border: 1px solid rgba(43,58,103,0.2); border-radius: 8px; font-size: 15px; margin-bottom: 12px; font-family: var(--font-sans); }
+    .btn-navy { background: var(--navy); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; }
+
+    #countdown-display { font-size: 48px; font-weight: 700; color: var(--error); margin: 20px 0; font-family: var(--font-serif); }
+    .btn-cancel { background: #fff; color: var(--ink); border: 2px solid var(--line); padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
+
+    /* Morse SOS */
+    #morse-view { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:black; color:white; z-index:999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 20px; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
+    
     <header>
-      <div class="logo">RL</div>
+      <div class="logo-icon">RL</div>
       <div>
         <h1 class="title">RakshaLink</h1>
-        <small style="color:#666;">Help, when you need it most.</small>
+        <div class="subtitle">Help, when you need it most.</div>
       </div>
     </header>
 
-    <div id="home-view">
+    <div id="home-view" style="display:flex; flex-direction:column; gap:20px; width:100%;">
+      
       <div class="card">
-        <div style="font-size:12px; font-weight:bold; color:#666; text-transform:uppercase;">Current Location</div>
-        <div id="loc-text" style="font-weight:bold; margin-top:4px;">GNIT Campus (22.6951, 88.3788)</div>
+        <div class="loc-title">Current Location</div>
+        <div class="loc-val" id="loc-text">GNIT Campus (22.6951, 88.3788)</div>
         <div class="preset-toggle">
           <button class="preset-btn active" id="btn-campus" onclick="setPreset('campus')">Campus</button>
           <button class="preset-btn" id="btn-nh19" onclick="setPreset('nh19')">NH-19</button>
@@ -53,51 +126,69 @@
       </div>
 
       <div class="grid">
-        <button class="tile tile-medical" onclick="sendSOS('medical')">Medical</button>
-        <button class="tile tile-accident" onclick="sendSOS('accident')">Accident</button>
-        <button class="tile tile-breakdown" onclick="sendSOS('breakdown')">Breakdown</button>
-        <button class="tile tile-fuel" onclick="sendSOS('fuel')">Fuel</button>
+        <button class="tile tile-medical" onclick="sendSOS('medical')">
+          <div class="tile-icon">✚</div>
+          <div class="tile-label">Medical</div>
+        </button>
+        <button class="tile tile-accident" onclick="sendSOS('accident')">
+          <div class="tile-icon">🚗</div>
+          <div class="tile-label">Accident</div>
+        </button>
+        <button class="tile tile-breakdown" onclick="sendSOS('breakdown')">
+          <div class="tile-icon">🔧</div>
+          <div class="tile-label">Breakdown</div>
+        </button>
+        <button class="tile tile-fuel" onclick="sendSOS('fuel')">
+          <div class="tile-icon">⛽</div>
+          <div class="tile-label">Fuel</div>
+        </button>
       </div>
 
-      <div class="card" style="background:#e6f0fa;">
-        <h3 style="margin-top:0; margin-bottom:12px;">Drive Mode</h3>
-        <select id="trace-select" class="input" style="width:100%; margin-bottom:12px; padding:8px;">
+      <div class="card drive-mode">
+        <h3>Drive Mode</h3>
+        <select id="trace-select" class="select-input">
           <option value="crash">Trace: Real Crash (8.4g, 60km/h)</option>
           <option value="speed_breaker">Trace: Speed Breaker</option>
           <option value="pothole">Trace: Pothole</option>
           <option value="hard_brake">Trace: Hard Brake</option>
           <option value="phone_drop_stationary">Trace: Phone Drop</option>
         </select>
-        <button class="preset-btn" style="background:var(--navy); color:white; padding:12px; border-radius:8px; width:100%;" onclick="runTrace()">Run Trace</button>
-        <div id="countdown-display" style="font-size:32px; font-weight:bold; color:red; margin-top:16px; text-align:center; display:none;">
-          <span id="countdown-val">20</span>
-          <br><button onclick="cancelCrash()" style="font-size:16px; padding:8px 16px; margin-top:8px;">I'm OK (Cancel)</button>
+        <button class="btn-navy" onclick="runTrace()">Simulate sensor trace</button>
+        
+        <div id="countdown-display" style="display:none;">
+          <div id="countdown-val">20</div>
+          <button class="btn-cancel" onclick="cancelCrash()">I'm OK (Cancel)</button>
         </div>
       </div>
 
       <a href="tel:112" class="btn-112">Call 112</a>
     </div>
 
-    <div id="tracker-view" style="display:none;">
+    <div id="tracker-view" style="display:none; width:100%;">
       <div class="tracker">
-        <h2 style="margin-top:0; color:var(--green);" id="tracker-status">Finding help...</h2>
-        <div class="step"><div class="circle active"></div> Request Sent <span id="queue-tag" style="display:none;font-size:10px;background:orange;padding:2px 4px;border-radius:4px;margin-left:4px;">Delivered from queue</span></div>
-        <div class="step"><div class="circle" id="st-notified"></div> Responders Notified</div>
-        <div class="step"><div class="circle" id="st-accepted"></div> Help Accepted</div>
-        <div class="step"><div class="circle" id="st-enroute"></div> On the way <span id="eta-text" style="color:#666;font-size:12px;margin-left:8px;"></span></div>
-        <div class="step"><div class="circle" id="st-arrived"></div> Arrived</div>
-        <div class="step"><div class="circle" id="st-resolved"></div> Resolved</div>
+        <h2 class="tracker-title" id="tracker-status">Finding help...</h2>
         
-        <p id="unanswered-text" style="color:var(--error); font-weight:bold; display:none;">No responder answered. Call 112.</p>
-        <button onclick="resetApp()" style="margin-top:20px; padding:12px; width:100%; border-radius:8px; border:1px solid #ccc; background:transparent;">Back to Home</button>
+        <div class="step active"><div class="circle"></div> Request Sent <span id="queue-tag" style="display:none;font-size:10px;background:var(--amber);color:#000;padding:2px 6px;border-radius:4px;margin-left:8px;font-weight:700;">Queued</span></div>
+        <div class="step" id="st-notified"><div class="circle"></div> Responders Notified</div>
+        <div class="step" id="st-accepted"><div class="circle"></div> Help Accepted</div>
+        <div class="step" id="st-enroute"><div class="circle"></div> On the way <span id="eta-text" style="color:var(--mute);font-size:13px;margin-left:8px;"></span></div>
+        <div class="step" id="st-arrived"><div class="circle"></div> Arrived</div>
+        <div class="step" id="st-resolved"><div class="circle"></div> Resolved</div>
+        
+        <div id="unanswered-text" style="display:none;">
+          No responder answered.<br><br>
+          <a href="tel:112" class="btn-112" style="font-size:16px; padding:12px;">Call 112 Now</a>
+        </div>
+        
+        <button class="btn-outline" onclick="resetApp()" style="margin-top:24px;">Back to Home</button>
       </div>
     </div>
     
-    <div id="morse-view" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:black; color:white; z-index:999; flex-direction:column; align-items:center; justify-content:center;">
-      <h1 style="color:red; font-size:48px;">SOS</h1>
-      <p>Offline Mode - Flashing Morse Code</p>
-      <p>Retrying connection...</p>
-      <button onclick="stopMorse()" style="padding:12px; background:white; color:black; border:none; border-radius:8px; margin-top:20px;">Stop</button>
+    <div id="morse-view">
+      <h1 style="color:var(--error); font-size:64px; font-family:var(--font-serif); margin:0;">SOS</h1>
+      <p style="font-size:20px; font-weight:700;">Offline Mode Active</p>
+      <p style="color:#aaa;">Flashing Morse Code. Retrying connection...</p>
+      <button onclick="stopMorse()" style="padding:16px 32px; background:white; color:black; border:none; border-radius:12px; margin-top:32px; font-weight:700; font-size:18px;">Stop</button>
     </div>
   </div>
 
@@ -110,12 +201,11 @@
     let currentPreset = 'campus';
     let currentEventId = null;
     let pollInterval = null;
-    let offlineQueue = [];
     let morseInterval = null;
 
-    // Audio context for beep
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function beep(duration, freq, vol) {
+      if(audioCtx.state === 'suspended') audioCtx.resume();
       const oscillator = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       oscillator.connect(gain);
@@ -136,22 +226,14 @@
 
     async function sendSOS(category, trigger = 'manual', extraData = {}) {
       const payload = { 
-        category, 
-        trigger, 
-        lat: PRESETS[currentPreset].lat, 
-        lng: PRESETS[currentPreset].lng,
-        client_id: Math.random().toString(36).substring(7),
-        ...extraData
+        category, trigger, lat: PRESETS[currentPreset].lat, lng: PRESETS[currentPreset].lng,
+        client_id: Math.random().toString(36).substring(7), ...extraData
       };
       
       document.getElementById('home-view').style.display = 'none';
       
       try {
-        const res = await fetch('/api/sos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
+        const res = await fetch('/api/sos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (!res.ok) throw new Error('Offline');
         const data = await res.json();
         currentEventId = data.id;
@@ -162,7 +244,6 @@
         pollInterval = setInterval(pollTracker, 2000);
         pollTracker();
       } catch (err) {
-        // OFFLINE FALLBACK
         localStorage.setItem('sos_queue', JSON.stringify(payload));
         startMorseSOS();
       }
@@ -172,14 +253,12 @@
       document.getElementById('morse-view').style.display = 'flex';
       let state = 0;
       morseInterval = setInterval(() => {
-        // Simple SOS: ... --- ... (fast flashing just for demo)
         const isFlash = state % 2 === 0;
         document.getElementById('morse-view').style.backgroundColor = isFlash ? 'white' : 'black';
         document.getElementById('morse-view').style.color = isFlash ? 'black' : 'white';
         if (isFlash) beep(100, 800, 1);
         state++;
         
-        // Background retry every 3s
         if (state % 15 === 0) {
           const q = localStorage.getItem('sos_queue');
           if (q) {
@@ -199,7 +278,7 @@
     function stopMorse() {
       clearInterval(morseInterval);
       document.getElementById('morse-view').style.display = 'none';
-      document.getElementById('home-view').style.display = 'block';
+      document.getElementById('home-view').style.display = 'flex';
     }
 
     async function pollTracker() {
@@ -209,11 +288,11 @@
         if (!res.ok) return;
         const ev = await res.json();
         
-        document.getElementById('st-notified').className = `circle ${ev.steps.notified ? 'active' : ''}`;
-        document.getElementById('st-accepted').className = `circle ${ev.steps.accepted ? 'active' : ''}`;
-        document.getElementById('st-enroute').className = `circle ${ev.steps.enroute ? 'active' : ''}`;
-        document.getElementById('st-arrived').className = `circle ${ev.steps.arrived ? 'active' : ''}`;
-        document.getElementById('st-resolved').className = `circle ${ev.steps.resolved ? 'active' : ''}`;
+        document.getElementById('st-notified').className = `step ${ev.steps.notified ? 'active' : ''}`;
+        document.getElementById('st-accepted').className = `step ${ev.steps.accepted ? 'active' : ''}`;
+        document.getElementById('st-enroute').className = `step ${ev.steps.enroute ? 'active' : ''}`;
+        document.getElementById('st-arrived').className = `step ${ev.steps.arrived ? 'active' : ''}`;
+        document.getElementById('st-resolved').className = `step ${ev.steps.resolved ? 'active' : ''}`;
         
         if (ev.responder_eta_minutes) {
           document.getElementById('eta-text').textContent = `(Estimate: ${ev.responder_eta_minutes}m)`;
@@ -221,13 +300,14 @@
 
         if (ev.steps.unanswered) {
           document.getElementById('tracker-status').textContent = 'Escalation Failed';
+          document.getElementById('tracker-status').style.color = 'var(--error)';
           document.getElementById('unanswered-text').style.display = 'block';
           clearInterval(pollInterval);
         } else if (ev.steps.resolved) {
           document.getElementById('tracker-status').textContent = 'Resolved';
           clearInterval(pollInterval);
         } else if (ev.steps.accepted) {
-          document.getElementById('tracker-status').textContent = 'Help is being arranged';
+          document.getElementById('tracker-status').textContent = 'Help is arranged';
         }
       } catch(e) {}
     }
@@ -237,24 +317,22 @@
       const traceId = document.getElementById('trace-select').value;
       const result = detectCrash(PREPARED_TRACES[traceId]);
       if (result) {
-        // Alarm
-        const display = document.getElementById('countdown-display');
-        display.style.display = 'block';
+        document.getElementById('countdown-display').style.display = 'block';
         let count = 20;
         document.getElementById('countdown-val').textContent = count;
         
         countdownTimer = setInterval(() => {
           count--;
           document.getElementById('countdown-val').textContent = count;
-          beep(200, 1000, 1);
+          beep(150, 1000, 1);
           if (count <= 0) {
             clearInterval(countdownTimer);
-            display.style.display = 'none';
+            document.getElementById('countdown-display').style.display = 'none';
             sendSOS('accident', 'crash_auto', result);
           }
         }, 1000);
       } else {
-        alert("Trace executed: No crash detected.");
+        alert("Trace executed: Normal driving (No crash detected).");
       }
     }
     function cancelCrash() {
@@ -265,12 +343,13 @@
     function resetApp() {
       currentEventId = null;
       if (pollInterval) clearInterval(pollInterval);
-      document.getElementById('home-view').style.display = 'block';
+      document.getElementById('home-view').style.display = 'flex';
       document.getElementById('tracker-view').style.display = 'none';
       document.getElementById('unanswered-text').style.display = 'none';
       document.getElementById('queue-tag').style.display = 'none';
-      ['notified','accepted','enroute','arrived','resolved'].forEach(s => document.getElementById(`st-${s}`).className = 'circle');
+      ['notified','accepted','enroute','arrived','resolved'].forEach(s => document.getElementById(`st-${s}`).className = 'step');
       document.getElementById('tracker-status').textContent = 'Finding help...';
+      document.getElementById('tracker-status').style.color = 'var(--green)';
       document.getElementById('eta-text').textContent = '';
     }
   </script>
