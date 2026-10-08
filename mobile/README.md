@@ -1,3 +1,3 @@
-# Mobile: rider app (Expo): SOS, status, Drive Mode, offline
+# Mobile: planned native app (Expo)
 
-Built during the Recursive hackathon window. See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md).
+This native app is planned and not part of the 8-hour build.

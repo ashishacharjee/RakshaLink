@@ -1,7 +1,7 @@
 # Architecture
 
 ```text
-Rider app (Expo)  ->  API (Express)  ->  Triage  ->  Match (PostGIS)  ->  Dispatch (SMS/voice)  ->  Responder
+Rider app (mobile web page)  ->  API (Express)  ->  Triage  ->  Match (PostGIS)  ->  Dispatch (SMS/voice)  ->  Responder
                                                                                    |
                                   Responder Console (web) <-- live updates (SSE) ---+
 ```
@@ -59,3 +59,4 @@ Hashed accept tokens, rate limiting on `POST /api/sos`, strict input validation,
 ## Responder workflow
 
 Responders have an **on duty** switch (off-duty responders are never matched or contacted) and move an alert through `accepted`, `enroute`, `arrived`, `resolved`. Each step is set only by the responder through the same tokenised link used for accepting. The rider sees only real steps. An ETA appears only if the responder typed it, labelled as the responder's estimate. Distances are straight-line, with no computed driving ETA. Role views filter the console: hospital sees medical and accident, police sees accident, mechanic sees breakdown, fuel pump sees fuel.
+

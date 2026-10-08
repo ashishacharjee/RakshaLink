@@ -1,4 +1,4 @@
-<p align="center">
+﻿<p align="center">
   <img src="assets/banner.png" alt="RakshaLink: Help, when you need it most." width="100%">
 </p>
 
@@ -17,12 +17,12 @@
 </p>
 
 <p align="center">
-  <a href="#why-rakshalink-exists">Why</a> &nbsp;·&nbsp;
-  <a href="#what-it-does">Features</a> &nbsp;·&nbsp;
-  <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
-  <a href="#design">Design</a> &nbsp;·&nbsp;
-  <a href="#build-status">Status</a> &nbsp;·&nbsp;
-  <a href="#safety-and-honesty">Safety</a> &nbsp;·&nbsp;
+  <a href="#why-rakshalink-exists">Why</a> &nbsp;Â·&nbsp;
+  <a href="#what-it-does">Features</a> &nbsp;Â·&nbsp;
+  <a href="#how-it-works">How it works</a> &nbsp;Â·&nbsp;
+  <a href="#design">Design</a> &nbsp;Â·&nbsp;
+  <a href="#build-status">Status</a> &nbsp;Â·&nbsp;
+  <a href="#safety-and-honesty">Safety</a> &nbsp;Â·&nbsp;
   <a href="#team-inittowinit">Team</a>
 </p>
 
@@ -87,16 +87,16 @@ RakshaLink is built for that moment: one tap, one spoken sentence, or **no tap a
 
 ```mermaid
 flowchart LR
-    A["📱 Rider app<br/>tap · speak · crash"] --> B["RakshaLink API"]
+    A["ðŸ“± Rider app<br/>tap Â· speak Â· crash"] --> B["RakshaLink API"]
     B --> C{"Triage<br/>rules"}
-    C -->|medical| D["🏥 nearest hospital"]
-    C -->|accident| E["🏥 hospital + 🚓 police"]
-    C -->|breakdown| F["🔧 nearest mechanic"]
-    C -->|fuel| G["⛽ nearest fuel pump"]
+    C -->|medical| D["ðŸ¥ nearest hospital"]
+    C -->|accident| E["ðŸ¥ hospital + ðŸš“ police"]
+    C -->|breakdown| F["ðŸ”§ nearest mechanic"]
+    C -->|fuel| G["â›½ nearest fuel pump"]
     D & E & F & G --> H["SMS + voice + accept link"]
-    H --> I["🖥️ Responder Console"]
-    I -->|accept| J["✅ Rider sees: Responder accepted"]
-    I -.->|no answer| K["⏭️ next-nearest responder"]
+    H --> I["ðŸ–¥ï¸ Responder Console"]
+    I -->|accept| J["âœ… Rider sees: Responder accepted"]
+    I -.->|no answer| K["â­ï¸ next-nearest responder"]
 ```
 
 ```mermaid
@@ -137,7 +137,7 @@ Speed context, an impact spike, and a sudden stop must all agree. Thresholds are
 Calm under stress: big targets, plain words, one dominant action per screen, and one colour per emergency (Fuel green, Breakdown teal, Accident navy, Medical maroon).
 
 <p align="center">
-  <img src="docs/design/desktop_incoming.png" alt="Responder Console, incoming alert (design reference)" width="100%">
+  <img src="docs/design/desktop_S0_incoming.png" alt="Responder Console, incoming alert (design reference)" width="100%">
 </p>
 <p align="center">
   <img src="docs/design/mobile_states.png" alt="Responder accept page on mobile: incoming, accepted, resolved (design reference)" width="85%">
@@ -152,27 +152,27 @@ Calm under stress: big targets, plain words, one dominant action per screen, and
 
 | Tier | Feature | Status |
 |---|---|---|
-| T1 | One-tap SOS (4 categories) with location | ⬜ |
-| T1 | Triage + nearest-responder matching | ⬜ |
-| T1 | Dispatch (mock or real SMS/voice) | ⬜ |
-| T1 | Responder Console + accept page | ⬜ |
-| T1 | Live status with real flags | ⬜ |
-| T1 | Drive Mode: simulate crash, 20 s countdown, auto SOS | ⬜ |
-| T2 | On-duty toggle, On the way / Arrived / Resolved, role views | ⬜ |
-| T2 | Auto-escalation | ⬜ |
-| T2 | Offline ladder (SMS fallback, Morse, queue) | ⬜ |
-| T2 | Sensor-based crash detector | ⬜ |
-| T2 | Family alert, time-to-dispatch metric | ⬜ |
-| T3 | Voice SOS, language toggle, share, history | ⬜ |
-| T3 | Responder history, operations overview | ⬜ |
+| T1 | One-tap SOS (4 categories) with location | â¬œ |
+| T1 | Triage + nearest-responder matching | â¬œ |
+| T1 | Dispatch (mock or real SMS/voice) | â¬œ |
+| T1 | Responder Console + accept page | â¬œ |
+| T1 | Live status with real flags | â¬œ |
+| T1 | Drive Mode: simulate crash, 20 s countdown, auto SOS | â¬œ |
+| T2 | On-duty toggle, On the way / Arrived / Resolved, role views | â¬œ |
+| T2 | Auto-escalation | â¬œ |
+| T2 | Offline ladder (SMS fallback, Morse, queue) | â¬œ |
+| T2 | Sensor-based crash detector | â¬œ |
+| T2 | Family alert, time-to-dispatch metric | â¬œ |
+| T3 | Voice SOS, language toggle, share, history | â¬œ |
+| T3 | Responder history, operations overview | â¬œ |
 
 ## Tech stack
 
 | Layer | Choice |
 |---|---|
-| Mobile | Expo + React Native |
+| Rider app | Mobile web app (opens in any phone browser) |
 | Backend | Node.js + Express, Server-Sent Events for live updates |
-| Data | PostgreSQL + PostGIS (with a haversine fallback), responders seeded from OpenStreetMap |
+| Matching | in-memory store with haversine nearest search |
 | Comms | SMS gateway and text-to-speech voice, behind a mock/real provider switch |
 | Maps | OpenStreetMap |
 
@@ -180,12 +180,12 @@ Calm under stress: big targets, plain words, one dominant action per screen, and
 
 ```text
 rakshalink/
-├── assets/     logo, banner, social preview, divider
-├── docs/       architecture, API contract, safety and honesty, design, demo, roadmap
-├── server/     API, triage, dispatch, escalation
-├── mobile/     rider app (Expo)
-├── web/        responder console + accept page
-└── .env.example
+â”œâ”€â”€ assets/     logo, banner, social preview, divider
+â”œâ”€â”€ docs/       architecture, API contract, safety and honesty, design, demo, roadmap
+â”œâ”€â”€ server/     API, triage, dispatch, escalation
+â”œâ”€â”€ mobile/     native app (Expo), planned, not part of the 8-hour build
+â”œâ”€â”€ web/        rider app (mobile web), responder console, accept page
+â””â”€â”€ .env.example
 ```
 
 ## Getting started
@@ -227,4 +227,7 @@ Guru Nanak Institute of Technology (GNIT), Kolkata.
 
 <p align="center"><img src="assets/divider.svg" width="520" alt=""></p>
 
-<p align="center"><sub>Map and responder data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Accident statistics: MoRTH, <i>Road Accidents in India 2023</i>. Built for the <b>Recursive</b> hackathon at GNIT. Released under the <a href="LICENSE">MIT License</a>.</sub></p>
+<p align="center"><sub>Map and responder data Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Accident statistics: MoRTH, <i>Road Accidents in India 2023</i>. Built for the <b>Recursive</b> hackathon at GNIT. Released under the <a href="LICENSE">MIT License</a>.</sub></p>
+
+
+
