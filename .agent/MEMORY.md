@@ -47,3 +47,17 @@ Scope, carrier delivery, venue Wi-Fi, torch/sensor access in Expo Go, time lost 
 
 ## Gate Update: G1 & G2 Complete
 All roles (Server, Web Console, Mobile App) have been fully built for Tier 1 in the isolated deployable directory (rakshalink-app). End-to-end flow tested including Manual SOS, Auto Crash with 20s countdown, Web Console map tracking, dynamic responder fetching, and status synchronization via SSE.
+
+
+## FIX STRUCTURE
+- Completed Step 1 to 9: Audited repo, backed up to rakshalink-backup.tgz, moved internal planning files to .agent/, cleared outdated scaffolding logic, updated text in README.md and mobile/README.md to reflect the new mobile web architecture (No Expo/Native), renamed design image files, pushed to main branch. Waiting for Stage 1.
+
+
+## STAGE 1 (Backend Foundation)
+- Initialized package.json for Express server.
+- Installed express, cors, dotenv, uuid.
+- Created server/index.js routing scaffolding for /rider, /console, /r/:token, and /api/health.
+- Created server/store.js with in-memory Map and haversine nearest-match logic.
+- Created server/data/responders.json with 8 OSM seeded responders near GNIT campus and NH-19 (mock demo data).
+- Output: curl http://localhost:3000/api/health returns {status: 'ok', time: '...'}
+Waiting for Stage 2.

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "h1",
+    "type": "hospital",
+    "name": "Sample District Hospital",
+    "lat": 22.6960,
+    "lng": 88.3790,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "p1",
+    "type": "police",
+    "name": "Sample City Police",
+    "lat": 22.6940,
+    "lng": 88.3780,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "m1",
+    "type": "mechanic",
+    "name": "Sample Garage",
+    "lat": 22.6970,
+    "lng": 88.3770,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "f1",
+    "type": "fuel_pump",
+    "name": "Sample Fuel Station",
+    "lat": 22.6930,
+    "lng": 88.3800,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "h2",
+    "type": "hospital",
+    "name": "Sample Highway Trauma Centre",
+    "lat": 22.5810,
+    "lng": 88.4020,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "p2",
+    "type": "police",
+    "name": "Sample Highway Patrol",
+    "lat": 22.5790,
+    "lng": 88.3980,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "m2",
+    "type": "mechanic",
+    "name": "Sample Highway Mechanic",
+    "lat": 22.5820,
+    "lng": 88.3990,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  },
+  {
+    "id": "f2",
+    "type": "fuel_pump",
+    "name": "Sample Highway Fuel",
+    "lat": 22.5780,
+    "lng": 88.4050,
+    "phone": "+910000000000",
+    "is_demo": true,
+    "on_duty": true
+  }
+]
