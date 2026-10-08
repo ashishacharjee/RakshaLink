@@ -225,8 +225,9 @@ Guru Nanak Institute of Technology (GNIT), Kolkata.
 | Item | Link |
 |---|---|
 | Demo video | _added at submission_ |
+| Simulation |<a href="https://drive.google.com/file/d/1CD7MTjLGViydto2W2vxVGj-v9CkIhnim/view?usp=drive_link"> Link </a> |
 | Slides |<a href="https://drive.google.com/file/d/1CD7MTjLGViydto2W2vxVGj-v9CkIhnim/view?usp=drive_link"> Link </a> |
-| Live demo | _added at submission_ |
+| Live demo | <a href="https://rakhalink.onrender.com/"> Link </a> |
 
 <p align="center"><img src="assets/divider.svg" width="520" alt=""></p>
 
