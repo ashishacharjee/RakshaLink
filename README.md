@@ -215,7 +215,6 @@ Guru Nanak Institute of Technology (GNIT), Kolkata.
 | Ashish Chandra Acharjee | Team Lead |
 | Pranay Saha | Team member |
 | Nitin Agarwal | Team member |
-| Ayush Mahato | Team member |
 
 ## Submission links
 
