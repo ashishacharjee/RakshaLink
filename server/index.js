@@ -120,6 +120,14 @@ app.get('/api/sos/:id', (req, res) => {
 });
 
 // Responder Actions
+app.get('/api/r/:token', (req, res) => {
+  const tk = store.verifyToken(req.params.token);
+  if (!tk) return res.status(403).json({ error: 'Invalid or expired token' });
+  const ev = store.getEvent(tk.sosId);
+  const dispatch = store.getDispatchLog().find(d => d.sosId === tk.sosId && d.responderId === tk.responderId);
+  res.json({ event: ev, dispatch });
+});
+
 app.post('/api/r/:token/accept', (req, res) => {
   const tk = store.verifyToken(req.params.token);
   if (!tk) return res.status(403).json({ error: 'Invalid or expired token' });

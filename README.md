@@ -162,7 +162,7 @@ Calm under stress: big targets, plain words, one dominant action per screen, and
 | T2 | Auto-escalation | â¬œ |
 | T2 | Offline ladder (SMS fallback, Morse, queue) | â¬œ |
 | T2 | Sensor-based crash detector | â¬œ |
-| T2 | Family alert, time-to-dispatch metric | â¬œ |
+| T2 | Family alert, time-to-dispatch metric | ❌ |
 | T3 | Voice SOS, language toggle, share, history | â¬œ |
 | T3 | Responder history, operations overview | â¬œ |
 
@@ -190,8 +190,12 @@ rakshalink/
 
 ## Getting started
 
-Setup steps are added at the final gate of the hackathon, once the code exists. Planned configuration names are in [`.env.example`](.env.example).
-
+\\\ash
+git clone https://github.com/ashishacharjee/RakshaLink.git
+cd RakshaLink
+npm install
+npm start
+\\\`n
 ## Safety and honesty
 
 - **Demo mode by default.** Alerts go only to team-owned test numbers. No real hospital, police station, or emergency service is ever contacted.
@@ -227,6 +231,7 @@ Guru Nanak Institute of Technology (GNIT), Kolkata.
 <p align="center"><img src="assets/divider.svg" width="520" alt=""></p>
 
 <p align="center"><sub>Map and responder data Â© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Accident statistics: MoRTH, <i>Road Accidents in India 2023</i>. Built for the <b>Recursive</b> hackathon at GNIT. Released under the <a href="LICENSE">MIT License</a>.</sub></p>
+
 
 
 
