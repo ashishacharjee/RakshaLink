@@ -4,12 +4,12 @@
   "description": "RakshaLink: Help, when you need it most.",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "test": "node --test server/tests/*.test.js",
+    "check": "node scripts/e2e-check.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "uuid": "^10.0.0"
+    "express": "^4.19.2"
   }
 }

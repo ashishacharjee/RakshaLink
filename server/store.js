@@ -1,10 +1,9 @@
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
-// Haversine formula to calculate distance in meters
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // Earth radius in meters
+  const R = 6371e3;
   const rad = Math.PI / 180;
   const dLat = (lat2 - lat1) * rad;
   const dLon = (lon2 - lon1) * rad;
@@ -15,11 +14,22 @@ function haversine(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// In-memory store
+const TRIAGE = {
+  medical: ['hospital'],
+  accident: ['hospital', 'police'],
+  breakdown: ['mechanic'],
+  fuel: ['fuel_pump']
+};
+
 class Store {
   constructor() {
+    this.reset();
+  }
+
+  reset() {
     this.events = new Map();
     this.dispatches = [];
+    this.tokens = new Map(); // SHA256 -> data
     this.responders = this.loadResponders();
   }
 
@@ -29,26 +39,35 @@ class Store {
       if (fs.existsSync(dataPath)) {
         return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
       }
-    } catch (err) {
-      console.error('Failed to load responders:', err);
-    }
+    } catch (err) {}
     return [];
   }
 
-  getResponders() {
-    return this.responders;
-  }
-
-  getEvents() {
-    return Array.from(this.events.values());
-  }
+  getResponders() { return this.responders; }
+  getEvents() { return Array.from(this.events.values()); }
+  getDispatchLog() { return this.dispatches; }
+  getEvent(id) { return this.events.get(id); }
 
   createEvent(data) {
-    const id = uuidv4();
+    // idempotent check
+    if (data.client_id) {
+      for (const ev of this.events.values()) {
+        if (ev.client_id === data.client_id) return ev;
+      }
+    }
+    const id = crypto.randomUUID();
     const event = {
       id,
-      ...data,
+      client_id: data.client_id,
+      category: data.category,
+      trigger: data.trigger || 'manual',
+      lat: data.lat,
+      lng: data.lng,
+      peak_g: data.peak_g,
+      pre_impact_kmh: data.pre_impact_kmh,
       created_at: Date.now(),
+      escalation_level: 0,
+      responder_eta_minutes: null,
       steps: {
         sent: true,
         notified: false,
@@ -63,15 +82,36 @@ class Store {
     return event;
   }
 
-  findNearest(lat, lng, types, limit = 3) {
-    const available = this.responders.filter(r => r.on_duty && types.includes(r.type));
-    const withDist = available.map(r => ({
-      ...r,
-      distance_m: haversine(lat, lng, r.lat, r.lng)
-    }));
+  findNearest(lat, lng, types, excludeResponderIds = []) {
+    const available = this.responders.filter(r => r.on_duty && types.includes(r.type) && !excludeResponderIds.includes(r.id));
+    const withDist = available.map(r => ({ ...r, distance_m: haversine(lat, lng, r.lat, r.lng) }));
     withDist.sort((a, b) => a.distance_m - b.distance_m);
-    return withDist.slice(0, limit);
+    
+    // Max 3 per type over escalation logic? The spec says "max 3 per type, then unanswered".
+    // Return all valid matches, escalation loop will pick next.
+    return withDist;
+  }
+
+  createToken(sosId, responderId) {
+    const rawToken = crypto.randomBytes(16).toString('hex'); // 128-bit
+    const hash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    this.tokens.set(hash, {
+      sosId,
+      responderId,
+      expiresAt: Date.now() + 2 * 60 * 60 * 1000 // 2 h
+    });
+    return { rawToken, hash };
+  }
+
+  verifyToken(rawToken) {
+    const hash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const data = this.tokens.get(hash);
+    if (!data) return null;
+    if (Date.now() > data.expiresAt) return null;
+    return data;
   }
 }
 
 module.exports = new Store();
+module.exports.haversine = haversine;
+module.exports.TRIAGE = TRIAGE;
