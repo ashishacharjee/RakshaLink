@@ -61,3 +61,10 @@ All roles (Server, Web Console, Mobile App) have been fully built for Tier 1 in 
 - Created server/data/responders.json with 8 OSM seeded responders near GNIT campus and NH-19 (mock demo data).
 - Output: curl http://localhost:3000/api/health returns {status: 'ok', time: '...'}
 Waiting for Stage 2.
+
+
+## Stage 1 (Backend)
+- Built store.js and index.js using only 'express'.
+- Triage, haversine matching, tokens (SHA256, 128-bit random), escalation loop implemented.
+- node --test passes for /api/sos, /health, and responder status transitions.
+Output: npm test passed successfully.
