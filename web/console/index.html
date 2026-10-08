@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RakshaLink Responder Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,269 +9,292 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
   <style>
     :root {
-      --bg: #EFEBDD;
-      --surface: #FBF9F2;
-      --ink: #1C2A12;
-      --mute: #5E6B57;
-      --line: rgba(39,71,6,0.14);
-      --green: #274706;
-      --teal: #1B4D4F;
-      --navy: #2B3A67;
-      --maroon: #5B1F2D;
-      --purple: #3D2A5C;
-      --cream: #F5F3EA;
-      --amber: #D9B25C;
-      --error: #ba1a1a;
-      
+      --bg: #EFEBDD; --surface: #FBF9F2; --ink: #1C2A12; --mute: #5E6B57;
+      --line: rgba(39,71,6,0.14); --green: #274706; --teal: #1B4D4F;
+      --navy: #2B3A67; --maroon: #5B1F2D; --error: #BA1A1A; --amber: #D9B25C;
       --font-serif: 'Noto Serif', Georgia, serif;
       --font-sans: 'DM Sans', system-ui, sans-serif;
-      --radius-card: 12px;
-      --radius-btn: 10px;
-      --radius-pill: 9999px;
+      --radius: 12px;
     }
-
     * { box-sizing: border-box; }
-    body { 
-      margin: 0; 
-      font-family: var(--font-sans); 
-      background: var(--bg); 
-      color: var(--ink);
-      display: flex; 
-      flex-direction: column; 
-      height: 100vh; 
-      overflow: hidden;
-    }
+    body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--ink); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-    /* Top Bar */
-    header { 
-      background: var(--green); 
-      color: var(--cream); 
-      height: 72px;
-      padding: 0 24px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      flex-shrink: 0;
-    }
+    /* TOP BAR */
+    header { background: var(--green); color: white; height: 72px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
     .logo-area { display: flex; align-items: center; gap: 12px; }
-    .logo-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    .logo-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
     .logo-text { font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin: 0; }
-    .logo-sub { font-size: 13px; opacity: 0.8; }
+    .logo-sub { font-size: 13px; opacity: 0.8; font-family: var(--font-sans); margin-left: 8px; }
     
-    .demo-banner { 
-      background: var(--amber); 
-      color: #000; 
-      font-weight: 700; 
-      padding: 6px 16px; 
-      border-radius: var(--radius-pill); 
-      font-size: 12px; 
-      letter-spacing: 0.5px;
-    }
+    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 6px 16px; border-radius: 99px; font-size: 12px; }
 
-    .header-actions { display: flex; align-items: center; gap: 16px; }
-    .role-select { 
-      background: rgba(255,255,255,0.1); 
-      color: white; 
-      border: 1px solid rgba(255,255,255,0.3); 
-      padding: 6px 12px; 
-      border-radius: 6px; 
-      font-family: var(--font-sans);
-      outline: none;
-    }
-    .role-select option { color: #000; }
-    .toggle-duty { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
-    .responder-chip { background: var(--surface); color: var(--green); font-weight: 700; padding: 6px 12px; border-radius: var(--radius-pill); font-size: 14px; }
-
-    /* Main Layout */
-    .main-container { display: flex; flex: 1; overflow: hidden; }
-
-    /* Sidebar */
-    .sidebar { 
-      width: 200px; 
-      background: var(--surface); 
-      border-right: 1px solid var(--line); 
-      padding: 24px 16px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .nav-item { padding: 12px 16px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; color: var(--mute); display: flex; justify-content: space-between; align-items: center; }
-    .nav-item.active { background: rgba(39,71,6,0.08); color: var(--green); }
-    .nav-item .coming-soon { font-size: 10px; font-weight: 700; background: var(--bg); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
-
-    /* Queue */
-    .queue { 
-      width: 320px; 
-      background: var(--surface); 
-      border-right: 1px solid var(--line); 
-      display: flex; 
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-    .queue-header { padding: 24px 20px 16px; border-bottom: 1px solid var(--line); }
-    .queue-header h3 { font-family: var(--font-serif); font-size: 20px; margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between; }
-    .queue-badge { background: var(--error); color: white; font-size: 12px; font-family: var(--font-sans); padding: 2px 8px; border-radius: 99px; }
+    .header-actions { display: flex; align-items: center; gap: 20px; }
+    .view-as-wrap { display: flex; flex-direction: column; font-size: 11px; color: rgba(255,255,255,0.7); }
+    .role-select { background: white; color: black; border: none; padding: 4px 8px; border-radius: 4px; font-family: var(--font-sans); font-weight: 600; font-size: 13px; margin-top: 2px; }
     
-    .filter-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
-    .filter-chip { background: var(--bg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 16px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; color: var(--mute); }
-    .filter-chip.active { background: var(--green); color: white; border-color: var(--green); }
+    .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.3); transition: .4s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #A3D172; }
+    input:checked + .slider:before { transform: translateX(16px); }
+    .on-duty-label { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 
-    .queue-list { overflow-y: auto; flex: 1; padding: 12px; }
-    .q-card { background: #fff; border-radius: var(--radius-card); padding: 16px; margin-bottom: 12px; cursor: pointer; border: 1px solid var(--line); border-left: 4px solid transparent; transition: all 0.2s; }
-    .q-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .q-card.active { background: #f0f7eb; border-color: var(--green); border-left-color: var(--green); }
-    
-    .q-cat { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-    .q-title { font-family: var(--font-serif); font-size: 18px; margin: 0 0 8px 0; color: var(--ink); }
-    .q-meta { font-size: 13px; color: var(--mute); display: flex; flex-direction: column; gap: 4px; }
-    .q-trigger { display: inline-block; background: #eef2f6; color: var(--navy); font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; margin-bottom: 4px; }
+    .responder-chip { background: white; color: var(--ink); border-radius: 99px; padding: 4px 12px 4px 4px; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+    .r-avatar { width: 24px; height: 24px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
 
-    /* Map */
-    .map-col { flex: 1; position: relative; background: #ddd; display: flex; flex-direction: column; }
-    #map { flex: 1; width: 100%; }
+    /* LAYOUT */
+    .main-area { display: flex; flex: 1; overflow: hidden; }
+    
+    /* SIDEBAR */
+    .sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+    .nav-item { padding: 12px 16px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; color: var(--mute); display: flex; flex-direction: column; }
+    .nav-item.active { background: #E2F4CF; color: var(--green); }
+    .coming-soon { font-size: 10px; font-weight: 600; color: #999; margin-top: 4px; }
 
-    /* Detail Panel */
-    .detail { 
-      width: 400px; 
-      background: var(--bg); 
-      border-left: 1px solid var(--line); 
-      display: flex; 
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow-y: auto;
-    }
-    .detail-content { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+    /* CONTENT GRID */
+    .content { flex: 1; display: grid; grid-template-columns: 320px repeat(6, 1fr); grid-auto-rows: min-content; gap: 24px; padding: 24px; overflow-y: auto; align-items: start; }
     
-    .d-header { display: flex; flex-direction: column; gap: 8px; }
-    .d-title { font-family: var(--font-serif); font-size: 28px; margin: 0; color: var(--ink); }
-    .d-location { font-size: 15px; color: var(--mute); line-height: 1.5; }
-    .d-distance { font-size: 32px; font-weight: 700; color: var(--ink); margin-top: 8px; }
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--line); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
     
-    .crash-box { background: rgba(43, 58, 103, 0.08); border-left: 4px solid var(--navy); padding: 16px; border-radius: 0 var(--radius-card) var(--radius-card) 0; }
-    .crash-box h4 { margin: 0 0 8px 0; color: var(--navy); font-size: 14px; display: flex; align-items: center; gap: 8px;}
-    .crash-box .unresponsive { font-weight: 700; color: var(--error); margin-bottom: 8px; font-size: 13px; }
-    .crash-box .stats { font-size: 13px; color: var(--mute); }
+    /* QUEUE */
+    .queue-col { grid-column: 1; grid-row: 1 / 4; display: flex; flex-direction: column; padding: 0; overflow: hidden; height: 100%; max-height: calc(100vh - 120px); }
+    .q-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--line); }
+    .q-title { font-family: var(--font-serif); font-size: 20px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
+    .q-badge { background: var(--error); color: white; font-size: 12px; font-family: var(--font-sans); padding: 2px 8px; border-radius: 99px; }
+    .q-filters { display: flex; gap: 8px; }
+    .q-chip { background: var(--bg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--mute); }
+    .q-chip.active { background: var(--green); color: white; border-color: var(--green); }
+    .q-list { flex: 1; overflow-y: auto; padding: 12px; }
+    .q-item { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 1px solid var(--line); cursor: pointer; display: flex; gap: 12px; border-left: 4px solid transparent; }
+    .q-item.active { background: #f0f7eb; border-color: var(--green); border-left-color: var(--green); }
+    .q-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; }
+    .q-info { flex: 1; }
+    .q-item-title { font-family: var(--font-serif); font-size: 16px; margin: 0 0 4px 0; color: var(--ink); }
+    .q-pill { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+    .q-pill.auto { background: #eef2f6; color: var(--navy); }
+    .q-pill.manual { background: var(--bg); color: var(--mute); }
+    .q-loc { font-size: 12px; color: var(--mute); }
+    .q-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+    .q-dist { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .q-time { font-size: 12px; color: var(--mute); margin-top: 4px; }
+    .q-footer { padding: 12px 20px; font-size: 11px; color: var(--mute); border-top: 1px solid var(--line); text-align: center; }
+
+    /* DETAIL & MAP */
+    .detail-card { grid-column: 2 / span 3; grid-row: 1; }
+    .map-card { grid-column: 5 / span 3; grid-row: 1; padding: 0; overflow: hidden; position: relative; min-height: 400px; display: flex; flex-direction: column; }
+    #map { flex: 1; width: 100%; z-index: 1; border-radius: var(--radius); }
+    .map-overlay-btn { position: absolute; top: 16px; right: 16px; z-index: 1000; background: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     
-    .btn { padding: 16px; border-radius: var(--radius-btn); font-family: var(--font-sans); font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; border: none; width: 100%; transition: opacity 0.2s; display: block; }
-    .btn:active { transform: scale(0.98); }
+    .d-header { display: flex; gap: 16px; margin-bottom: 24px; }
+    .d-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
+    .d-title-area { flex: 1; }
+    .d-title { font-family: var(--font-serif); font-size: 26px; margin: 0 0 8px 0; color: var(--ink); display: flex; align-items: center; gap: 12px; }
+    .d-reported { font-size: 13px; color: var(--mute); }
+    
+    .d-loc-block { display: flex; justify-content: space-between; margin-bottom: 16px; }
+    .d-loc-left h4 { font-size: 11px; text-transform: uppercase; color: var(--mute); margin: 0 0 4px 0; letter-spacing: 0.5px; }
+    .d-loc-left p { margin: 0 0 4px 0; font-weight: 700; font-size: 16px; }
+    .d-loc-left span { font-size: 13px; color: var(--mute); }
+    .d-loc-right { text-align: right; }
+    .d-loc-right h4 { font-size: 11px; color: var(--mute); margin: 0 0 4px 0; font-weight: 400; }
+    .d-loc-right p { margin: 0 0 4px 0; font-weight: 700; font-size: 24px; }
+    .d-loc-right span { font-size: 13px; color: var(--mute); }
+
+    .crash-box { background: rgba(43,58,103,0.05); border: 1px solid rgba(43,58,103,0.1); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+    .crash-box h4 { margin: 0 0 4px 0; color: var(--navy); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .crash-box p { margin: 0 0 4px 0; font-size: 13px; color: var(--ink); }
+    .crash-box .unresponsive { font-weight: 700; margin-bottom: 12px; }
+    .crash-stats { display: flex; gap: 32px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 12px; position: relative; }
+    .crash-stat-item label { font-size: 11px; color: var(--mute); display: block; margin-bottom: 2px; }
+    .crash-stat-item val { font-size: 16px; font-weight: 700; }
+    .sample-label { position: absolute; bottom: 0; right: 0; font-size: 10px; color: var(--mute); }
+
+    .btn { padding: 16px; border-radius: 8px; font-family: var(--font-sans); font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; border: none; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-green { background: var(--green); color: white; }
-    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: transparent; }
-    .btn-outline-grey { border: 2px solid var(--mute); color: var(--mute); background: transparent; }
-    .btn-grey-fill { background: #e0e4db; color: var(--mute); }
+    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: white; }
     
-    .countdown-box { background: rgba(186, 26, 26, 0.08); border: 1px solid rgba(186, 26, 26, 0.2); color: var(--error); padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 15px; margin-bottom: 12px; }
+    .action-row { display: flex; gap: 16px; align-items: center; }
+    .escalate-box { background: rgba(186, 26, 26, 0.05); border: 1px solid rgba(186, 26, 26, 0.2); border-radius: 8px; padding: 8px 16px; text-align: center; color: var(--error); flex-shrink: 0; }
+    .escalate-box label { font-size: 11px; display: block; margin-bottom: 2px; }
+    .escalate-box val { font-size: 20px; font-weight: 700; }
 
-    .card { background: white; border-radius: var(--radius-card); padding: 20px; border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-    .card h3 { font-family: var(--font-sans); font-size: 16px; margin: 0 0 16px 0; color: var(--ink); }
+    .helper-text { font-size: 13px; color: var(--mute); margin-top: 12px; }
+    .status-chip { display: inline-flex; background: #e2f4cf; color: var(--green); padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; margin-bottom: 16px; }
+
+    /* ROW 2 CARDS */
+    .info-card { grid-column: 2 / span 2; grid-row: 2; }
+    .progress-card { grid-column: 4 / span 2; grid-row: 2; }
+    .actions-card { grid-column: 6 / span 2; grid-row: 2; }
     
-    .progress-step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--mute); font-size: 14px; font-weight: 500; }
-    .progress-step:last-child { margin-bottom: 0; }
-    .progress-step.checked { color: var(--ink); }
+    .card-title { font-family: var(--font-serif); font-size: 18px; margin: 0 0 16px 0; color: var(--ink); }
+    
+    /* Info Content */
+    .r-info-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .r-info-avatar { width: 40px; height: 40px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .r-info-name { font-weight: 700; font-size: 15px; margin: 0; }
+    .r-info-type { font-size: 13px; color: var(--mute); margin: 0; }
+    .chip-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .mini-chip { background: var(--bg); border: 1px solid var(--line); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+    .mini-chip.duty { background: #e2f4cf; color: var(--green); border-color: transparent; }
+    .info-dist { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    /* Progress Content */
+    .progress-layout { display: flex; gap: 24px; }
+    .progress-steps { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+    .p-step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--mute); font-weight: 500; }
+    .p-step.checked { color: var(--ink); }
     .p-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; }
-    .progress-step.checked .p-icon { border-color: var(--green); background: var(--green); }
-    .progress-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
+    .p-step.checked .p-icon { border-color: var(--green); background: var(--green); }
+    .p-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
+    .estimate-box { background: #e2f4cf; padding: 12px; border-radius: 8px; text-align: center; width: 120px; flex-shrink: 0; align-self: flex-start; }
+    .estimate-box label { font-size: 11px; color: var(--green); display: block; margin-bottom: 4px; }
+    .estimate-box val { font-size: 14px; font-weight: 700; color: var(--ink); }
 
-    .eta-box { font-size: 14px; color: var(--mute); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
-    
-    .log-strip { background: var(--surface); padding: 12px 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--mute); display: flex; gap: 24px; font-family: monospace; }
+    /* Actions Content */
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .btn-sm { padding: 10px; border-radius: 8px; border: none; font-weight: 600; font-family: var(--font-sans); font-size: 14px; cursor: pointer; text-align: center; }
+    .btn-sm:disabled { background: #e0e4db; color: var(--mute); cursor: not-allowed; }
+    .btn-sm.active { background: var(--surface); border: 2px solid var(--green); color: var(--green); }
+    .action-input-row { display: flex; gap: 12px; }
+    .input-field { flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-family: var(--font-sans); font-size: 13px; }
+
+    /* EVENT LOG */
+    .log-card { grid-column: 2 / 5; grid-row: 3; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th { padding: 12px 0; border-bottom: 1px solid var(--line); font-weight: 700; color: var(--ink); }
+    td { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--mute); }
+    tr:last-child td { border-bottom: none; }
+    td.ev-col { font-weight: 700; color: var(--ink); }
+
+    .empty-state { grid-column: 2 / 5; text-align: center; padding: 60px; color: var(--mute); font-size: 16px; }
   </style>
 </head>
 <body>
   <header>
     <div class="logo-area">
-      <div class="logo-icon">RL</div>
+      <div class="logo-icon" style="background:transparent; padding:0;">
+        <img src="/assets/emblem.svg" alt="RakshaLink" width="32" height="32" style="border-radius:8px;">
+      </div>
       <div>
-        <h1 class="logo-text">RakshaLink</h1>
-        <div class="logo-sub">Help, when you need it most.</div>
+        <h1 class="logo-text">RakshaLink<span class="logo-sub">Help, when you need it most.</span></h1>
       </div>
     </div>
     <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
     <div class="header-actions">
-      <select class="role-select" id="role-select">
-        <option value="">View as...</option>
-      </select>
-      <label class="toggle-duty">
-        <input type="checkbox" id="duty-toggle" checked> On duty
+      <div class="view-as-wrap">
+        <label>View as</label>
+        <select class="role-select" id="role-select"></select>
+      </div>
+      <label class="on-duty-label">
+        <label class="switch"><input type="checkbox" id="duty-toggle" checked><span class="slider"></span></label>
+        On duty
       </label>
-      <div class="responder-chip" id="my-name">Guest</div>
+      <div class="responder-chip" id="my-name">
+        <div class="r-avatar" id="my-avatar">SC</div>
+        <span id="my-name-text">Sample City Hospital</span>
+      </div>
     </div>
   </header>
 
-  <div class="main-container">
+  <div class="main-area">
     <aside class="sidebar">
-      <div class="nav-item active">Home</div>
-      <div class="nav-item">History <span class="coming-soon">Coming soon</span></div>
-      <div class="nav-item">Profile <span class="coming-soon">Coming soon</span></div>
-      <div class="nav-item">Settings <span class="coming-soon">Coming soon</span></div>
+      <div class="nav-item active">
+        <span style="display:flex; align-items:center; gap:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          Home
+        </span>
+      </div>
+      <div class="nav-item">
+        <span style="display:flex; align-items:center; gap:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          History
+        </span>
+        <span class="coming-soon">Coming soon</span>
+      </div>
+      <div class="nav-item">
+        <span style="display:flex; align-items:center; gap:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          Profile
+        </span>
+        <span class="coming-soon">Coming soon</span>
+      </div>
+      <div class="nav-item">
+        <span style="display:flex; align-items:center; gap:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Settings
+        </span>
+        <span class="coming-soon">Coming soon</span>
+      </div>
     </aside>
 
-    <div class="queue" id="queue">
-      <div class="queue-header">
-        <h3>Live alert queue <span class="queue-badge" id="q-count">0</span></h3>
-        <div class="filter-chips">
-          <div class="filter-chip active">All</div>
-          <div class="filter-chip">Medical</div>
-          <div class="filter-chip">Accident</div>
+    <div class="content" id="main-grid">
+      <!-- Queue -->
+      <div class="card queue-col">
+        <div class="q-header">
+          <h3 class="q-title">Live alert queue <span class="q-badge" id="q-count">0</span></h3>
+          <div class="q-filters">
+            <div class="q-chip active" id="f-all">All <span id="c-all">0</span></div>
+            <div class="q-chip" id="f-med">Medical <span id="c-med">0</span></div>
+            <div class="q-chip" id="f-acc">Accident <span id="c-acc">0</span></div>
+          </div>
         </div>
+        <div class="q-list" id="q-list"></div>
+        <div class="q-footer">All names, distances and times are sample data.</div>
       </div>
-      <div class="queue-list" id="queue-list">
-        <!-- Rendered by JS -->
+      
+      <!-- Rendered Details -->
+      <div id="right-panels" style="display:contents">
+        <div class="empty-state">Select an alert from the queue to view details.</div>
       </div>
-    </div>
-
-    <div class="map-col">
-      <div id="map"></div>
-      <div class="log-strip" id="log-strip">
-        System active. Standing by.
-      </div>
-    </div>
-
-    <div class="detail" id="detail">
-      <!-- Rendered by JS -->
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const COLORS = {
-      medical: 'var(--maroon)',
-      accident: 'var(--navy)',
-      breakdown: 'var(--teal)',
-      fuel: 'var(--green)'
-    };
-    
-    const TITLES = {
-      medical: 'Medical SOS',
-      accident: 'Road Accident',
-      breakdown: 'Vehicle Breakdown',
-      fuel: 'Fuel Shortage'
-    };
+    const COLORS = { medical: 'var(--maroon)', accident: 'var(--navy)', breakdown: 'var(--teal)', fuel: 'var(--green)' };
+    const TITLES = { medical: 'Medical SOS', accident: 'Road Accident', breakdown: 'Vehicle Breakdown', fuel: 'Fuel Shortage' };
+    const ICONS = { medical: '✚', accident: '🚗', breakdown: '🔧', fuel: '⛽' };
 
-    let state = { events: [], responders: [], selectedId: null, role: null };
-    let map, markerRider, markerResp, line;
+    let state = { events: [], responders: [], selectedId: null, role: null, filter: 'all' };
+    let map, markerRider, markerResp, routeLine;
+    let timerInterval = null;
 
-    function initMap() {
-      map = L.map('map').setView([22.695, 88.378], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
+    function formatTimeAgo(ms) {
+      const mins = Math.floor((Date.now() - ms) / 60000);
+      if (mins < 1) return 'just now';
+      return `${mins} min ago`;
+    }
+
+    function formatTime(ms) {
+      const d = new Date(ms);
+      return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
     }
 
     async function fetchData() {
       const evRes = await fetch('/api/events');
-      state.events = (await evRes.json()).sort((a,b)=>b.created_at - a.created_at);
+      state.events = (await evRes.json()).sort((a,b) => b.created_at - a.created_at);
+      
       const respRes = await fetch('/api/responders');
       state.responders = await respRes.json();
       
       const sel = document.getElementById('role-select');
-      if (sel.options.length === 1) {
+      if (sel.options.length === 0) {
         state.responders.forEach(r => {
           const opt = document.createElement('option');
-          opt.value = r.id; opt.textContent = r.name;
+          opt.value = r.id; 
+          opt.textContent = `${r.type.charAt(0).toUpperCase() + r.type.slice(1)} (${r.name})`;
           sel.appendChild(opt);
         });
+        const defaultResp = state.responders.find(r => r.type === 'hospital');
+        if (defaultResp) {
+          sel.value = defaultResp.id;
+          state.role = defaultResp.id;
+        } else if (state.responders.length > 0) {
+          sel.value = state.responders[0].id;
+          state.role = state.responders[0].id;
+        }
       }
       render();
     }
@@ -283,178 +305,366 @@
       evtSource.onerror = () => setTimeout(fetchData, 3000);
     }
 
-    function timeAgo(ms) {
-      const mins = Math.floor((Date.now() - ms) / 60000);
-      if (mins < 1) return 'Just now';
-      return `${mins} min ago`;
+    function getFilteredEvents() {
+      const me = state.responders.find(r => r.id === state.role);
+      if (!me) return [];
+      
+      // Role filter
+      let events = state.events.filter(ev => {
+        if (me.type === 'hospital') return ev.category === 'medical' || ev.category === 'accident';
+        if (me.type === 'police') return ev.category === 'accident';
+        if (me.type === 'mechanic') return ev.category === 'breakdown';
+        if (me.type === 'fuel_pump') return ev.category === 'fuel';
+        return false;
+      });
+      
+      // Tab filter
+      if (state.filter === 'med') events = events.filter(e => e.category === 'medical');
+      if (state.filter === 'acc') events = events.filter(e => e.category === 'accident');
+      return events;
     }
 
-    function render() {
-      // Update Role UI
-      const me = state.responders.find(r => r.id === state.role);
-      document.getElementById('my-name').textContent = me ? me.name : 'Guest';
+    function renderQueue() {
+      const allEv = getFilteredEvents();
+      const medCount = allEv.filter(e=>e.category==='medical').length;
+      const accCount = allEv.filter(e=>e.category==='accident').length;
       
-      // Render Queue
-      const qList = document.getElementById('queue-list');
-      document.getElementById('q-count').textContent = state.events.filter(e=>!e.steps.resolved).length;
+      document.getElementById('q-count').textContent = allEv.filter(e=>!e.steps.resolved).length;
+      document.getElementById('c-all').textContent = allEv.length;
+      document.getElementById('c-med').textContent = medCount;
+      document.getElementById('c-acc').textContent = accCount;
+      
+      const qList = document.getElementById('q-list');
       qList.innerHTML = '';
       
-      state.events.forEach(ev => {
+      allEv.forEach(ev => {
         const isActive = ev.id === state.selectedId;
         const color = COLORS[ev.category];
         const title = TITLES[ev.category];
-        const dist = (ev.dispatches || []).find(d=>d.responderId===state.role)?.distance_m;
-        const distText = dist ? `${(dist/1000).toFixed(1)} km` : 'Distance unknown';
+        const myDispatch = (ev.dispatches || []).find(d => d.responderId === state.role);
+        const distText = myDispatch ? `${(myDispatch.distance_m/1000).toFixed(1)} km` : 'Distance unknown';
+        
+        let pill = ev.trigger === 'crash_auto' ? `<div class="q-pill auto">Automatic crash</div>` : `<div class="q-pill manual">Manual</div>`;
+        if (ev.steps.accepted && myDispatch && myDispatch.status !== 'pending' && myDispatch.status !== 'declined') {
+          pill = `<div class="q-pill" style="background:#e2f4cf; color:var(--green)">Accepted by you</div>`;
+        }
         
         const div = document.createElement('div');
-        div.className = `q-card ${isActive ? 'active' : ''}`;
+        div.className = `q-item ${isActive ? 'active' : ''}`;
         div.onclick = () => { state.selectedId = ev.id; render(); };
         
         div.innerHTML = `
-          <div class="q-cat" style="background:${color}20; color:${color};">${ev.category}</div>
-          <h4 class="q-title">${title}</h4>
-          <div class="q-meta">
-            ${ev.trigger === 'crash_auto' ? `<span class="q-trigger">Automatic crash alert</span>` : ''}
-            <span>${distText} • ${timeAgo(ev.created_at)}</span>
-            <span>Sample location</span>
+          <div class="q-icon" style="background:${color}">${ICONS[ev.category]}</div>
+          <div class="q-info">
+            <h4 class="q-item-title">${title}</h4>
+            ${pill}
+            <div class="q-loc">Sample location</div>
+          </div>
+          <div class="q-right">
+            <div class="q-dist">${distText}</div>
+            <div class="q-time">${formatTimeAgo(ev.created_at)}</div>
           </div>
         `;
         qList.appendChild(div);
       });
+    }
 
-      // Render Detail
-      const detail = document.getElementById('detail');
-      if (!state.selectedId) { 
-        detail.innerHTML = '<div style="padding:24px;color:var(--mute);text-align:center;">Select an alert from the queue to view details.</div>'; 
-        if (markerRider) { map.removeLayer(markerRider); markerRider=null; }
-        if (markerResp) { map.removeLayer(markerResp); markerResp=null; }
-        if (line) { map.removeLayer(line); line=null; }
-        return; 
+    function generateLogRows(ev, me) {
+      const rows = [];
+      rows.push({ time: ev.created_at, event: 'Alert received', details: `${TITLES[ev.category]}, ${ev.trigger==='crash_auto'?'automatic crash':'manual'} (demo location)`, by: 'System' });
+      
+      const dispatches = ev.dispatches || [];
+      if (dispatches.length > 0) {
+        const names = dispatches.map(d => {
+          const r = state.responders.find(x=>x.id===d.responderId);
+          return r ? `${r.name} ${(d.distance_m/1000).toFixed(1)} km` : 'Unknown';
+        }).join(', ');
+        rows.push({ time: dispatches[0].created_at, event: 'Matching complete', details: names, by: 'System' });
       }
       
-      const ev = state.events.find(e => e.id === state.selectedId);
-      if (!ev) return;
+      dispatches.forEach(d => {
+        const rName = state.responders.find(x=>x.id===d.responderId)?.name || 'Unknown';
+        rows.push({ time: d.created_at, event: 'Responder notified', details: rName, by: 'System' });
+        if (d.accepted_at) rows.push({ time: d.accepted_at, event: 'Alert accepted', details: '', by: rName });
+        if (d.declined_at) rows.push({ time: d.declined_at, event: 'Responder declined', details: '', by: rName });
+      });
 
-      const myDispatch = state.role ? (ev.dispatches || []).find(d => d.responderId === state.role) : null;
+      if (ev.status_log) {
+        ev.status_log.forEach(l => {
+          let evtName = '';
+          if(l.step==='enroute') evtName='On the way';
+          if(l.step==='arrived') evtName='Arrived';
+          if(l.step==='resolved') evtName='Resolved';
+          const rName = state.responders.find(x=>x.id===ev.accepted_by)?.name || 'Unknown';
+          rows.push({ time: l.timestamp, event: evtName, details: l.eta_minutes ? `Estimate: ${l.eta_minutes} min` : '', by: rName });
+        });
+      }
+
+      return rows.sort((a,b) => a.time - b.time);
+    }
+
+    function renderDetail() {
+      const me = state.responders.find(r => r.id === state.role);
+      const panels = document.getElementById('right-panels');
       
+      const ev = getFilteredEvents().find(e => e.id === state.selectedId);
+      if (!ev || !me) {
+        panels.innerHTML = '<div class="empty-state">Select an alert from the queue to view details.</div>';
+        return;
+      }
+
+      const myDispatch = (ev.dispatches || []).find(d => d.responderId === state.role);
+      const distKm = myDispatch ? (myDispatch.distance_m/1000).toFixed(1) : '0.0';
+      const color = COLORS[ev.category];
+
       let uiState = 'S0';
       if (ev.steps.resolved) uiState = 'S4';
       else if (ev.steps.arrived) uiState = 'S3';
       else if (ev.steps.enroute) uiState = 'S2';
       else if (ev.steps.accepted) uiState = 'S1';
 
-      const color = COLORS[ev.category];
-
-      let html = `<div class="detail-content">
-        <div class="d-header">
-          <div class="q-cat" style="background:${color}20; color:${color}; align-self:flex-start;">${ev.category}</div>
-          <h2 class="d-title">${TITLES[ev.category]}</h2>
-          <div class="d-location">${ev.lat}, ${ev.lng}<br>GNIT Campus, Sodepur (demo)</div>
-          ${myDispatch ? `<div class="d-distance">${(myDispatch.distance_m/1000).toFixed(1)} km <span style="font-size:14px; font-weight:400; color:var(--mute)">straight-line</span></div>` : ''}
-        </div>
-      `;
-
+      // Detail Card
+      let crashBox = '';
       if (ev.trigger === 'crash_auto') {
-        html += `
+        crashBox = `
         <div class="crash-box">
-          <h4>Automatic crash alert</h4>
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M9 3v18"></path></svg>
+            Automatic crash alert
+          </h4>
+          <p>Hard impact and sudden stop detected.</p>
           <div class="unresponsive">Victim may be unresponsive.</div>
-          <div class="stats">Peak impact ${ev.peak_g} g • Speed before ${ev.pre_impact_kmh} km/h (sample)</div>
-        </div>`;
-      }
-
-      if (uiState === 'S0' && myDispatch && myDispatch.status === 'pending') {
-        html += `
-        <div>
-          <div class="countdown-box">Escalates in 00:20</div>
-          <div style="display:flex; gap:12px; margin-bottom:12px;">
-            <button class="btn btn-green" onclick="acceptAlert('${myDispatch.token}')">Accept alert</button>
-            <button class="btn btn-outline-red" style="width:auto; padding:16px 24px;" onclick="declineAlert('${myDispatch.token}')">Can't respond</button>
+          <div class="crash-stats">
+            <div class="crash-stat-item"><label>Peak impact</label><val>${ev.peak_g} g</val></div>
+            <div class="crash-stat-item"><label>Speed before impact</label><val>${ev.pre_impact_kmh} km/h</val></div>
+            <div class="sample-label">sample values</div>
           </div>
-          <button class="btn btn-outline-grey" style="font-size:13px; padding:10px;" onclick="prompt('Simulate SMS accept link:', '${window.location.origin}/r/${myDispatch.token}')">Copy accept link (Demo)</button>
         </div>`;
       }
 
-      html += `
-        <div class="card">
-          <h3>Response progress</h3>
-          <div class="progress-step checked"><div class="p-icon"></div> Notified</div>
-          <div class="progress-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
-          <div class="progress-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
-          <div class="progress-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
-          <div class="progress-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
-          <div class="eta-box">
-            Responder's estimate: <strong>${ev.responder_eta_minutes ? ev.responder_eta_minutes + ' min' : 'Not available yet'}</strong>
+      let btnRow = '';
+      if (uiState === 'S0' && myDispatch && myDispatch.status === 'pending') {
+        btnRow = `
+        <div class="action-row">
+          <button class="btn btn-green" onclick="postAction('${myDispatch.token}', 'accept')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Accept alert
+          </button>
+          <div class="escalate-box">
+            <label>Escalates in</label>
+            <val id="countdown-val">00:20</val>
+          </div>
+          <button class="btn btn-outline-red" style="width: auto; padding: 16px 24px;" onclick="postAction('${myDispatch.token}', 'decline')">Can't respond</button>
+        </div>
+        <div class="helper-text">If nobody accepts, this alert goes to the next-nearest responder.</div>
+        `;
+        
+        // Start countdown
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          const limit = ev.created_at + 20000;
+          const left = Math.max(0, Math.floor((limit - Date.now())/1000));
+          const el = document.getElementById('countdown-val');
+          if(el) el.textContent = `00:${left.toString().padStart(2,'0')}`;
+          if(left <= 0) clearInterval(timerInterval);
+        }, 1000);
+      } else if (ev.steps.accepted) {
+        btnRow = `<div class="status-chip">✓ Alert accepted</div>`;
+      }
+
+      const mapHtml = `
+        <div class="card map-card">
+          <a href="https://www.openstreetmap.org/?mlat=${ev.lat}&mlon=${ev.lng}#map=15/${ev.lat}/${ev.lng}" target="_blank" class="map-overlay-btn">Open in Maps ↗</a>
+          <div id="map"></div>
+        </div>
+      `;
+
+      // Info Card
+      const infoCard = `
+        <div class="card info-card">
+          <h3 class="card-title">Responder information</h3>
+          <div class="r-info-header">
+            <div class="r-info-avatar">${me.name.substring(0,2).toUpperCase()}</div>
+            <div>
+              <h4 class="r-info-name">${me.name}</h4>
+              <p class="r-info-type">${me.type.charAt(0).toUpperCase() + me.type.slice(1)} responder</p>
+            </div>
+          </div>
+          <div class="chip-row">
+            <div class="mini-chip duty">● On duty</div>
+            <div class="mini-chip" style="text-transform:capitalize;">${me.type}</div>
+          </div>
+          <div class="info-dist">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            ${distKm} km straight-line
           </div>
         </div>
       `;
 
-      if (myDispatch && ev.steps.accepted && !ev.steps.resolved) {
-        html += `
-        <div class="card">
-          <h3>Update status</h3>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <button class="btn ${uiState==='S1'?'btn-green':'btn-grey-fill'}" ${uiState==='S1'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'enroute')">On my way</button>
-            <button class="btn ${uiState==='S2'?'btn-green':'btn-grey-fill'}" ${uiState==='S2'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'arrived')">Arrived</button>
-            <button class="btn ${uiState==='S3'?'btn-green':'btn-grey-fill'}" ${uiState==='S3'?'':'disabled'} onclick="updateStatus('${myDispatch.token}', 'resolved')">Resolved</button>
+      // Progress Card
+      const progCard = `
+        <div class="card progress-card">
+          <h3 class="card-title">Response progress</h3>
+          <div class="progress-layout">
+            <div class="progress-steps">
+              <div class="p-step checked"><div class="p-icon"></div> Notified</div>
+              <div class="p-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
+              <div class="p-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
+              <div class="p-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
+              <div class="p-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
+            </div>
+            <div class="estimate-box">
+              <label>Your estimate<br><span style="font-size:9px;color:var(--mute)">(shown to the caller)</span></label>
+              <val>${ev.responder_eta_minutes ? ev.responder_eta_minutes + ' min' : 'Not available yet'}</val>
+            </div>
           </div>
-        </div>`;
-      } else if (ev.steps.resolved) {
-        html += `
-        <div style="display:flex; gap:12px;">
-          <button class="btn btn-grey-fill" disabled>✓ Resolved</button>
-          <button class="btn btn-outline-grey" onclick="state.selectedId=null; render()">Back to alerts</button>
-        </div>`;
-      }
+        </div>
+      `;
 
-      html += `</div>`;
-      detail.innerHTML = html;
+      // Actions Card
+      const isMyAlert = myDispatch && ev.accepted_by === state.role;
+      const canEnroute = isMyAlert && uiState === 'S1';
+      const canArrive = isMyAlert && uiState === 'S2';
+      const canResolve = isMyAlert && uiState === 'S3';
 
-      // Update Map
-      try {
-        if (markerRider) map.removeLayer(markerRider);
-        markerRider = L.marker([ev.lat, ev.lng]).addTo(map);
-        if (state.role && me) {
-          if (markerResp) map.removeLayer(markerResp);
-          markerResp = L.marker([me.lat, me.lng]).addTo(map);
-          if (line) map.removeLayer(line);
-          line = L.polyline([[ev.lat, ev.lng], [me.lat, me.lng]], {color: 'red', dashArray: '5, 5'}).addTo(map);
-          map.fitBounds(line.getBounds(), {padding: [50,50]});
-        } else {
-          if (markerResp) { map.removeLayer(markerResp); markerResp=null; }
-          if (line) { map.removeLayer(line); line=null; }
-          map.setView([ev.lat, ev.lng], 14);
-        }
-      } catch (e) {
-        document.getElementById('map').innerHTML = `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <rect width="100%" height="100%" fill="#eee"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="20" fill="#999">Map Offline (SVG Fallback)</text>
-          <line x1="20%" y1="80%" x2="80%" y2="20%" stroke="red" stroke-width="2" stroke-dasharray="5,5" />
-          <circle cx="20%" cy="80%" r="6" fill="var(--maroon)" />
-          <circle cx="80%" cy="20%" r="6" fill="var(--green)" />
-        </svg>`;
-      }
+      let actCard = `
+        <div class="card actions-card">
+          <h3 class="card-title">Responder actions</h3>
+          <p style="font-size:13px; color:var(--ink); margin: 0 0 12px 0;">Update status</p>
+          <div class="action-grid">
+            <button class="btn-sm ${canEnroute?'active':''}" ${canEnroute?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'enroute')">On my way</button>
+            <button class="btn-sm ${canArrive?'active':''}" ${canArrive?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'arrived')">Arrived</button>
+            <button class="btn-sm ${canResolve?'active':''}" ${canResolve?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'resolved')">Resolved</button>
+          </div>
+      `;
       
-      // Update Log
-      let logText = `SOS ${ev.id.substring(0,8)} created.`;
-      if (ev.steps.notified) logText += ` | Responders notified.`;
-      if (ev.steps.accepted) logText += ` | Alert accepted.`;
-      if (ev.steps.enroute) logText += ` | On the way.`;
-      if (ev.steps.arrived) logText += ` | Arrived.`;
-      if (ev.steps.resolved) logText += ` | Resolved.`;
-      document.getElementById('log-strip').textContent = logText;
+      if (uiState === 'S4') {
+        actCard += `<button class="btn btn-outline-red" style="width:100%; border-color:var(--line); color:var(--ink); margin-top: 16px;" onclick="state.selectedId=null;render()">Back to alerts</button>`;
+      } else {
+        actCard += `
+          <div class="action-input-row">
+            <input type="number" id="eta-input" class="input-field" placeholder="e.g. 8 min (optional)" ${isMyAlert?'':'disabled'}>
+            <button class="btn-sm" style="background:#e0e4db; color:var(--mute);" ${isMyAlert?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'enroute')">Update</button>
+          </div>
+        `;
+      }
+      actCard += `</div>`;
+
+      // Log Card
+      const logRows = generateLogRows(ev, me);
+      const logCard = `
+        <div class="card log-card">
+          <h3 class="card-title">Event log</h3>
+          <table>
+            <thead>
+              <tr><th>Time</th><th>Event</th><th>Details</th><th>By</th></tr>
+            </thead>
+            <tbody>
+              ${logRows.map(r => `
+                <tr>
+                  <td>${formatTime(r.time)}</td>
+                  <td class="ev-col">${r.event}</td>
+                  <td>${r.details}</td>
+                  <td>${r.by}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      panels.innerHTML = `
+        <div class="card detail-card">
+          <div class="d-header">
+            <div class="d-icon" style="background:${color}">${ICONS[ev.category]}</div>
+            <div class="d-title-area">
+              <h2 class="d-title">${TITLES[ev.category]} ${ev.trigger==='crash_auto' ? `<div class="q-pill auto" style="margin:0; font-size:12px; font-family:var(--font-sans)">Automatic crash</div>` : ''}</h2>
+              <div class="d-reported">Reported ${formatTimeAgo(ev.created_at)} • via RakshaLink app</div>
+            </div>
+          </div>
+          <div class="d-loc-block">
+            <div class="d-loc-left">
+              <h4>Victim location</h4>
+              <p>GNIT campus, Sodepur (demo)</p>
+              <span>${ev.lat}° N, ${ev.lng}° E</span>
+            </div>
+            <div class="d-loc-right">
+              <h4>Distance from you</h4>
+              <p>${distKm} km</p>
+              <span>straight-line</span>
+            </div>
+          </div>
+          ${crashBox}
+          ${btnRow}
+        </div>
+        ${mapHtml}
+        ${infoCard}
+        ${progCard}
+        ${actCard}
+        ${logCard}
+      `;
+
+      // Setup Map
+      setTimeout(() => {
+        if (!map) {
+          map = L.map('map').setView([ev.lat, ev.lng], 13);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+        }
+        
+        if (markerRider) map.removeLayer(markerRider);
+        if (markerResp) map.removeLayer(markerResp);
+        if (routeLine) map.removeLayer(routeLine);
+
+        const customIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:${color}; width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">${ICONS[ev.category]}</div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
+        markerRider = L.marker([ev.lat, ev.lng], {icon: customIcon}).bindTooltip("Accident location", {permanent:true, direction:"top", className:"map-lbl"}).addTo(map);
+
+        if (me) {
+          const youIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--green); width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
+          markerResp = L.marker([me.lat, me.lng], {icon: youIcon}).bindTooltip("You", {permanent:true, direction:"top", className:"map-lbl map-lbl-green"}).addTo(map);
+          routeLine = L.polyline([[ev.lat, ev.lng], [me.lat, me.lng]], {color: 'var(--mute)', weight: 3, dashArray: '8, 8'}).addTo(map);
+          map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+        }
+      }, 0);
     }
 
-    async function acceptAlert(token) { await fetch('/api/r/'+token+'/accept', {method:'POST'}); fetchData(); }
-    async function declineAlert(token) { await fetch('/api/r/'+token+'/decline', {method:'POST'}); state.selectedId=null; fetchData(); }
-    async function updateStatus(token, step) { await fetch('/api/r/'+token+'/status', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({step})}); fetchData(); }
+    // Add map styles dynamically
+    const mapStyle = document.createElement('style');
+    mapStyle.innerHTML = `.map-lbl { background: var(--navy); color: white; border: none; font-weight: 700; border-radius: 99px; padding: 4px 12px; font-family: var(--font-sans); } .map-lbl-green { background: var(--green); } .leaflet-tooltip::before { border-top-color: transparent !important; }`;
+    document.head.appendChild(mapStyle);
+
+    function render() {
+      // Header
+      const me = state.responders.find(r => r.id === state.role);
+      document.getElementById('my-name-text').textContent = me ? me.name : 'Guest';
+      document.getElementById('my-avatar').textContent = me ? me.name.substring(0,2).toUpperCase() : 'G';
+      
+      renderQueue();
+      renderDetail();
+    }
+
+    async function postAction(token, action) {
+      if(!token) return;
+      await fetch(`/api/r/${token}/${action}`, {method:'POST'});
+      if (action === 'decline') state.selectedId = null;
+      fetchData();
+    }
+    async function postStatus(token, step) {
+      if(!token) return;
+      const payload = { step };
+      const eta = document.getElementById('eta-input')?.value;
+      if (eta) payload.eta_minutes = parseInt(eta);
+      await fetch(`/api/r/${token}/status`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      fetchData();
+    }
 
     document.getElementById('role-select').onchange = (e) => { state.role = e.target.value; render(); };
     document.getElementById('duty-toggle').onchange = async (e) => {
-      if (state.role) await fetch('/api/responders/'+state.role+'/duty', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({on_duty:e.target.checked})});
+      if (state.role) await fetch(`/api/responders/${state.role}/duty`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({on_duty:e.target.checked})});
     };
+    document.getElementById('f-all').onclick = () => { state.filter = 'all'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-all').classList.add('active'); render(); };
+    document.getElementById('f-med').onclick = () => { state.filter = 'med'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-med').classList.add('active'); render(); };
+    document.getElementById('f-acc').onclick = () => { state.filter = 'acc'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-acc').classList.add('active'); render(); };
 
-    initMap();
     fetchData();
     connectSSE();
   </script>

@@ -68,6 +68,9 @@ class Store {
       created_at: Date.now(),
       escalation_level: 0,
       responder_eta_minutes: null,
+      event_log: [
+        { time: Date.now(), event: 'Alert received', details: `${data.category} emergency, ${data.trigger === 'crash_auto' ? 'automatic crash' : 'manual'} (demo location)`, by: 'System' }
+      ],
       steps: {
         sent: true,
         notified: false,
@@ -80,6 +83,13 @@ class Store {
     };
     this.events.set(id, event);
     return event;
+  }
+
+  addLog(id, eventName, details, by) {
+    const ev = this.events.get(id);
+    if (ev && ev.event_log) {
+      ev.event_log.push({ time: Date.now(), event: eventName, details, by });
+    }
   }
 
   findNearest(lat, lng, types, excludeResponderIds = []) {

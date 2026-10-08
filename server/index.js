@@ -24,6 +24,7 @@ app.use('/api', rateLimit);
 // Serve static pages
 const webPath = path.join(__dirname, '../web');
 app.use(express.static(webPath));
+app.use('/assets', express.static(path.join(__dirname, '../assets')));
 app.get('/rider', (req, res) => res.sendFile(path.join(webPath, 'rider/index.html')));
 app.get('/console', (req, res) => res.sendFile(path.join(webPath, 'console/index.html')));
 app.get('/r/:token', (req, res) => res.sendFile(path.join(webPath, 'accept/index.html')));

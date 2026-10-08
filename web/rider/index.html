@@ -118,11 +118,7 @@
       
       <div class="card">
         <div class="loc-title">Current Location</div>
-        <div class="loc-val" id="loc-text">GNIT Campus (22.6951, 88.3788)</div>
-        <div class="preset-toggle">
-          <button class="preset-btn active" id="btn-campus" onclick="setPreset('campus')">Campus</button>
-          <button class="preset-btn" id="btn-nh19" onclick="setPreset('nh19')">NH-19</button>
-        </div>
+        <div class="loc-val" id="loc-text">GNIT Campus, Sodepur (demo) (22.6951, 88.3788)</div>
       </div>
 
       <div class="grid">
@@ -195,8 +191,7 @@
   <script src="./crash.js"></script>
   <script>
     const PRESETS = {
-      campus: { name: 'GNIT Campus', lat: 22.6951, lng: 88.3788 },
-      nh19: { name: 'NH-19 Sample', lat: 22.5800, lng: 88.4000 }
+      campus: { name: 'GNIT Campus, Sodepur (demo)', lat: 22.6951, lng: 88.3788 }
     };
     let currentPreset = 'campus';
     let currentEventId = null;
