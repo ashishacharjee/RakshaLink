@@ -8,4 +8,5 @@
 | [DEMO.md](DEMO.md) | Demo flow, and what is real versus simulated |
 | [DESIGN.md](DESIGN.md) and [DESIGN_TOKENS.md](DESIGN_TOKENS.md) | Visual language and exact tokens |
 | [design/](design/) | Design reference images |
+| [DEPLOY.md](DEPLOY.md) | Deploying to Render |
 | [ROADMAP.md](ROADMAP.md) | What is built now and what is only a proposal |

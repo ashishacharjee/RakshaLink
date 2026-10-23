@@ -1,672 +1,300 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>RakshaLink Responder Console</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <style>
-    :root {
-      --bg: #EFEBDD; --surface: #FBF9F2; --ink: #1C2A12; --mute: #5E6B57;
-      --line: rgba(39,71,6,0.14); --green: #274706; --teal: #1B4D4F;
-      --navy: #2B3A67; --maroon: #5B1F2D; --error: #BA1A1A; --amber: #D9B25C;
-      --font-serif: 'Noto Serif', Georgia, serif;
-      --font-sans: 'DM Sans', system-ui, sans-serif;
-      --radius: 12px;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: var(--font-sans); background: var(--bg); color: var(--ink); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-
-    /* TOP BAR */
-    header { background: var(--green); color: white; height: 72px; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-    .logo-area { display: flex; align-items: center; gap: 12px; }
-    .logo-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-    .logo-text { font-family: var(--font-serif); font-size: 20px; font-weight: 600; margin: 0; }
-    .logo-sub { font-size: 13px; opacity: 0.8; font-family: var(--font-sans); margin-left: 8px; }
-    
-    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 6px 16px; border-radius: 99px; font-size: 12px; }
-
-    .header-actions { display: flex; align-items: center; gap: 20px; }
-    .view-as-wrap { display: flex; flex-direction: column; font-size: 11px; color: rgba(255,255,255,0.7); }
-    .role-select { background: white; color: black; border: none; padding: 4px 8px; border-radius: 4px; font-family: var(--font-sans); font-weight: 600; font-size: 13px; margin-top: 2px; }
-    
-    .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.3); transition: .4s; border-radius: 20px; }
-    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: #A3D172; }
-    input:checked + .slider:before { transform: translateX(16px); }
-    .on-duty-label { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-
-    .responder-chip { background: white; color: var(--ink); border-radius: 99px; padding: 4px 12px 4px 4px; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
-    .r-avatar { width: 24px; height: 24px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; }
-
-    /* LAYOUT */
-    .main-area { display: flex; flex: 1; overflow: hidden; }
-    
-    /* SIDEBAR */
-    .sidebar { width: 200px; background: var(--surface); border-right: 1px solid var(--line); padding: 16px; display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
-    .nav-item { padding: 12px 16px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; color: var(--mute); display: flex; flex-direction: column; }
-    .nav-item.active { background: #E2F4CF; color: var(--green); }
-    .coming-soon { font-size: 10px; font-weight: 600; color: #999; margin-top: 4px; }
-
-    /* CONTENT GRID */
-    .content { flex: 1; display: grid; grid-template-columns: 320px repeat(6, 1fr); grid-auto-rows: min-content; gap: 24px; padding: 24px; overflow-y: auto; align-items: start; }
-    
-    .card { background: white; border-radius: var(--radius); border: 1px solid var(--line); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-    
-    /* QUEUE */
-    .queue-col { grid-column: 1; grid-row: 1 / 4; display: flex; flex-direction: column; padding: 0; overflow: hidden; height: 100%; max-height: calc(100vh - 120px); }
-    .q-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--line); }
-    .q-title { font-family: var(--font-serif); font-size: 20px; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; }
-    .q-badge { background: var(--error); color: white; font-size: 12px; font-family: var(--font-sans); padding: 2px 8px; border-radius: 99px; }
-    .q-filters { display: flex; gap: 8px; }
-    .q-chip { background: var(--bg); border: 1px solid var(--line); padding: 6px 12px; border-radius: 16px; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--mute); }
-    .q-chip.active { background: var(--green); color: white; border-color: var(--green); }
-    .q-list { flex: 1; overflow-y: auto; padding: 12px; }
-    .q-item { background: white; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; border: 1px solid var(--line); cursor: pointer; display: flex; gap: 12px; border-left: 4px solid transparent; }
-    .q-item.active { background: #f0f7eb; border-color: var(--green); border-left-color: var(--green); }
-    .q-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; flex-shrink: 0; }
-    .q-info { flex: 1; }
-    .q-item-title { font-family: var(--font-serif); font-size: 16px; margin: 0 0 4px 0; color: var(--ink); }
-    .q-pill { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
-    .q-pill.auto { background: #eef2f6; color: var(--navy); }
-    .q-pill.manual { background: var(--bg); color: var(--mute); }
-    .q-loc { font-size: 12px; color: var(--mute); }
-    .q-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-    .q-dist { font-size: 14px; font-weight: 700; color: var(--ink); }
-    .q-time { font-size: 12px; color: var(--mute); margin-top: 4px; }
-    .q-footer { padding: 12px 20px; font-size: 11px; color: var(--mute); border-top: 1px solid var(--line); text-align: center; }
-
-    /* DETAIL & MAP */
-    .detail-card { grid-column: 2 / span 3; grid-row: 1; }
-    .map-card { grid-column: 5 / span 3; grid-row: 1; padding: 0; overflow: hidden; position: relative; min-height: 400px; display: flex; flex-direction: column; }
-    #map { flex: 1; width: 100%; z-index: 1; border-radius: var(--radius); }
-    .map-overlay-btn { position: absolute; top: 16px; right: 16px; z-index: 1000; background: white; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 13px; text-decoration: none; color: var(--ink); border: 1px solid var(--line); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    
-    .d-header { display: flex; gap: 16px; margin-bottom: 24px; }
-    .d-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
-    .d-title-area { flex: 1; }
-    .d-title { font-family: var(--font-serif); font-size: 26px; margin: 0 0 8px 0; color: var(--ink); display: flex; align-items: center; gap: 12px; }
-    .d-reported { font-size: 13px; color: var(--mute); }
-    
-    .d-loc-block { display: flex; justify-content: space-between; margin-bottom: 16px; }
-    .d-loc-left h4 { font-size: 11px; text-transform: uppercase; color: var(--mute); margin: 0 0 4px 0; letter-spacing: 0.5px; }
-    .d-loc-left p { margin: 0 0 4px 0; font-weight: 700; font-size: 16px; }
-    .d-loc-left span { font-size: 13px; color: var(--mute); }
-    .d-loc-right { text-align: right; }
-    .d-loc-right h4 { font-size: 11px; color: var(--mute); margin: 0 0 4px 0; font-weight: 400; }
-    .d-loc-right p { margin: 0 0 4px 0; font-weight: 700; font-size: 24px; }
-    .d-loc-right span { font-size: 13px; color: var(--mute); }
-
-    .crash-box { background: rgba(43,58,103,0.05); border: 1px solid rgba(43,58,103,0.1); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
-    .crash-box h4 { margin: 0 0 4px 0; color: var(--navy); font-size: 14px; display: flex; align-items: center; gap: 8px; }
-    .crash-box p { margin: 0 0 4px 0; font-size: 13px; color: var(--ink); }
-    .crash-box .unresponsive { font-weight: 700; margin-bottom: 12px; }
-    .crash-stats { display: flex; gap: 32px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 12px; position: relative; }
-    .crash-stat-item label { font-size: 11px; color: var(--mute); display: block; margin-bottom: 2px; }
-    .crash-stat-item val { font-size: 16px; font-weight: 700; }
-    .sample-label { position: absolute; bottom: 0; right: 0; font-size: 10px; color: var(--mute); }
-
-    .btn { padding: 16px; border-radius: 8px; font-family: var(--font-sans); font-size: 16px; font-weight: 700; cursor: pointer; text-align: center; border: none; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-green { background: var(--green); color: white; }
-    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: white; }
-    
-    .action-row { display: flex; gap: 16px; align-items: center; }
-    .escalate-box { background: rgba(186, 26, 26, 0.05); border: 1px solid rgba(186, 26, 26, 0.2); border-radius: 8px; padding: 8px 16px; text-align: center; color: var(--error); flex-shrink: 0; }
-    .escalate-box label { font-size: 11px; display: block; margin-bottom: 2px; }
-    .escalate-box val { font-size: 20px; font-weight: 700; }
-
-    .helper-text { font-size: 13px; color: var(--mute); margin-top: 12px; }
-    .status-chip { display: inline-flex; background: #e2f4cf; color: var(--green); padding: 6px 12px; border-radius: 6px; font-weight: 700; font-size: 14px; margin-bottom: 16px; }
-
-    /* ROW 2 CARDS */
-    .info-card { grid-column: 2 / span 2; grid-row: 2; }
-    .progress-card { grid-column: 4 / span 2; grid-row: 2; }
-    .actions-card { grid-column: 6 / span 2; grid-row: 2; }
-    
-    .card-title { font-family: var(--font-serif); font-size: 18px; margin: 0 0 16px 0; color: var(--ink); }
-    
-    /* Info Content */
-    .r-info-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .r-info-avatar { width: 40px; height: 40px; background: var(--green); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-    .r-info-name { font-weight: 700; font-size: 15px; margin: 0; }
-    .r-info-type { font-size: 13px; color: var(--mute); margin: 0; }
-    .chip-row { display: flex; gap: 8px; margin-bottom: 16px; }
-    .mini-chip { background: var(--bg); border: 1px solid var(--line); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; }
-    .mini-chip.duty { background: #e2f4cf; color: var(--green); border-color: transparent; }
-    .info-dist { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-
-    /* Progress Content */
-    .progress-layout { display: flex; gap: 24px; }
-    .progress-steps { flex: 1; display: flex; flex-direction: column; gap: 12px; }
-    .p-step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--mute); font-weight: 500; }
-    .p-step.checked { color: var(--ink); }
-    .p-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; }
-    .p-step.checked .p-icon { border-color: var(--green); background: var(--green); }
-    .p-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
-    .estimate-box { background: #e2f4cf; padding: 12px; border-radius: 8px; text-align: center; width: 120px; flex-shrink: 0; align-self: flex-start; }
-    .estimate-box label { font-size: 11px; color: var(--green); display: block; margin-bottom: 4px; }
-    .estimate-box val { font-size: 14px; font-weight: 700; color: var(--ink); }
-
-    /* Actions Content */
-    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-    .btn-sm { padding: 10px; border-radius: 8px; border: none; font-weight: 600; font-family: var(--font-sans); font-size: 14px; cursor: pointer; text-align: center; }
-    .btn-sm:disabled { background: #e0e4db; color: var(--mute); cursor: not-allowed; }
-    .btn-sm.active { background: var(--surface); border: 2px solid var(--green); color: var(--green); }
-    .action-input-row { display: flex; gap: 12px; }
-    .input-field { flex: 1; padding: 10px; border: 1px solid var(--line); border-radius: 8px; font-family: var(--font-sans); font-size: 13px; }
-
-    /* EVENT LOG */
-    .log-card { grid-column: 2 / 5; grid-row: 3; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-    th { padding: 12px 0; border-bottom: 1px solid var(--line); font-weight: 700; color: var(--ink); }
-    td { padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--mute); }
-    tr:last-child td { border-bottom: none; }
-    td.ev-col { font-weight: 700; color: var(--ink); }
-
-    .empty-state { grid-column: 2 / 5; text-align: center; padding: 60px; color: var(--mute); font-size: 16px; }
-  </style>
-</head>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RakshaLink · Responder Console</title>
+<link rel="icon" href="/assets/emblem.svg">
+<link rel="stylesheet" href="/shared/tokens.css">
+<link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+<style>
+#top{background:var(--green);color:var(--cream);min-height:76px;display:flex;align-items:center;gap:20px;padding:10px 28px;flex-wrap:wrap}
+#top .logo{display:flex;align-items:center;gap:12px;flex:none}#top .logo b{font:600 24px var(--serif);display:block;line-height:1}#top .logo small{font-size:12.5px;opacity:.8}
+#top .demo{margin:0 auto}
+#top .right{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+#top label.v{font-size:11.5px;opacity:.78;display:block;margin-bottom:2px}
+#view{font:500 14px var(--sans);background:var(--surface);color:var(--ink);border:0;border-radius:10px;padding:9px 10px;width:280px;max-width:100%}
+.tg{display:flex;align-items:center;gap:10px;font:500 15px var(--sans);cursor:pointer}
+.tg input{position:absolute;opacity:0}.tg .tr{width:48px;height:28px;border-radius:14px;background:rgba(245,243,234,.3);position:relative;transition:.15s}.tg .tr::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--cream);transition:.15s}
+.tg input:checked+.tr{background:#8FB66A}.tg input:checked+.tr::after{left:23px}.tg input:focus-visible+.tr{outline:2px solid var(--amber)}
+.org{display:flex;align-items:center;gap:10px;font:500 15px var(--sans)}.org .av{width:38px;height:38px;border-radius:50%;background:var(--cream);color:var(--green);display:grid;place-items:center;font:700 13px var(--sans)}
+#shell{display:grid;grid-template-columns:minmax(0,1fr);min-height:calc(100vh - 76px)}
+#side{display:none;background:var(--surface);border-right:1px solid var(--line);padding:22px 14px;flex-direction:column;gap:8px}
+#side .it{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;color:var(--mute);font:500 16px var(--sans)}
+#side .it small{display:block;font-size:11.5px}
+#side .it.on{background:var(--tint);color:var(--green);font-weight:700}
+@media (min-width:1280px){#shell{grid-template-columns:200px minmax(0,1fr)}#side{display:flex}}
+#main{display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;padding:28px;align-items:start}
+#right{display:grid;gap:24px;min-width:0}
+.r1{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px}
+.r2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+.pad{padding:24px}
+.card h3{font-size:18px;margin-bottom:14px}
+#queue{padding:20px;position:sticky;top:16px;max-height:calc(100vh - 110px);overflow-y:auto}
+#queue h2{font-size:22px;display:flex;align-items:center;gap:10px}
+#qb{background:var(--err);color:#fff;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font:700 13px var(--sans)}
+#chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.fc{border:0;border-radius:999px;padding:7px 15px;font:700 13.5px var(--sans);background:var(--chip);color:var(--ink);cursor:pointer}.fc.on{background:var(--green);color:var(--cream)}
+.qr{display:flex;gap:14px;padding:14px 12px;border-radius:14px;cursor:pointer;border:0;background:none;text-align:left;width:100%;min-width:0;border-bottom:1px solid var(--line);position:relative;align-items:center}
+.qr.sel{background:var(--ntint)}.qr.sel::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:4px;border-radius:2px;background:var(--navy)}
+.qr .t{font:700 16px var(--sans)}.qr .m{font-size:13px;color:var(--mute);margin-top:5px}.qr .r{margin-left:auto;text-align:right;font-size:13px;color:var(--mute);white-space:nowrap}.qr .r b{display:block;font-size:15px;color:var(--ink)}
+.qr.gone{opacity:.55}
+.tools{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.tools select{width:100%;font:500 14px var(--sans);padding:10px;border-radius:12px;border:1px solid rgba(39,71,6,.22);background:var(--surface);color:var(--ink)}
+.empty{text-align:center;padding:44px 20px;color:var(--mute)}.empty h2{color:var(--ink);font-size:24px;margin:14px 0 8px}
+#detail h2{font-size:28px;line-height:1.1}
+.dh{display:flex;gap:16px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:var(--cream);border-radius:999px;padding:6px 14px;font:700 13.5px var(--sans)}.pill.gray{background:var(--disabled);color:var(--mute)}
+.where{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:20px 0;align-items:flex-start}.where small{display:block;color:var(--mute);font-size:13px}.where b{font-size:16px;display:block;margin:2px 0}
+.crash{background:var(--ntint);border:1px solid rgba(43,58,103,.25);border-radius:16px;padding:16px 18px}
+.crash h4{font:700 15px var(--sans);color:var(--navy);display:flex;gap:8px;align-items:center}
+.crash p{font-size:14.5px;margin-top:8px}
+.crash .mm{display:flex;gap:32px;flex-wrap:wrap;border-top:1px solid rgba(43,58,103,.2);margin-top:12px;padding-top:12px}.crash .mm small{display:block;color:var(--mute);font-size:12.5px}.crash .mm b{font:600 22px var(--serif)}
+.go{margin-top:20px;display:grid;gap:12px}
+.go .big{min-height:58px;font-size:18px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cdb{border:1px solid rgba(186,26,26,.35);background:#FBEDEB;border-radius:14px;text-align:center;padding:8px;display:flex;flex-direction:column;justify-content:center}.cdb small{font-size:12.5px;color:var(--mute)}.cdb b{font:600 24px var(--serif);color:var(--err)}
+.hint{font-size:13px;color:var(--mute);margin-top:12px}.hint a{color:var(--navy);font-weight:700}
+.mapc{position:relative;overflow:hidden;min-height:440px;padding:0}
+#leaf,#mapfb{position:absolute;inset:0}
+#mapfb svg{width:100%;height:100%;display:block}
+.mapc .open{position:absolute;top:14px;right:14px;z-index:500;padding:9px 14px;min-height:0;font-size:14px;border-radius:12px}
+.mapc .attr{position:absolute;left:12px;bottom:10px;z-index:500;background:rgba(251,249,242,.9);border-radius:8px;padding:3px 10px;font-size:12px;color:var(--mute)}
+.leaflet-container{font-family:var(--sans)}
+.tt{background:var(--navy);color:#fff;border:0;font:700 12.5px var(--sans);padding:4px 11px;border-radius:14px;box-shadow:none}.tt.green{background:var(--green)}.tt::before{display:none}
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:14px}
+.steps li{display:flex;gap:14px;align-items:center;color:var(--mute);font:500 16px var(--sans)}
+.steps li::before{content:"";width:24px;height:24px;border-radius:50%;border:2px solid rgba(94,107,87,.5);background:var(--surface);flex:none}
+.steps li.done{color:var(--ink);font-weight:700}.steps li.done::before{border-color:var(--green);background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5F3EA' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/16px no-repeat}
+.est{background:var(--tint);border-radius:14px;padding:14px 16px;margin-top:18px;font-size:13.5px;color:var(--mute)}.est b{display:block;color:var(--ink);font-size:17px;margin-top:4px}
+.stack{display:grid;gap:10px}.stack .btn{justify-content:flex-start;min-height:50px}
+.inp{display:flex;gap:10px;margin-top:6px}.inp input{flex:1;min-width:0;border:1px solid rgba(39,71,6,.22);border-radius:12px;padding:12px 14px;font:400 16px var(--sans);background:var(--surface)}.inp input:disabled{background:var(--disabled)}.inp .btn{min-height:48px;padding:10px 18px}
+.lbl{font-size:13.5px;color:var(--mute);margin:16px 0 4px;display:block}
+#log table{width:100%;border-collapse:collapse;font-size:14.5px}#log th{text-align:left;color:var(--mute);font:700 12px var(--sans);letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}#log td{padding:11px 10px;border-bottom:1px solid var(--line)}
+@media (max-width:1100px){#orgName{display:none}#top{padding:10px 16px;gap:12px}#top .demo{margin:0;font-size:10.5px}#view{width:230px}}
+@media (max-width:899px){#main{grid-template-columns:1fr;padding:16px}#queue{position:static;max-height:none}.r1,.r2{grid-template-columns:1fr}}
+</style></head>
 <body>
-  <header>
-    <div class="logo-area">
-      <div class="logo-icon" style="background:transparent; padding:0;">
-        <img src="/assets/emblem.svg" alt="RakshaLink" width="32" height="32" style="border-radius:8px;">
-      </div>
-      <div>
-        <h1 class="logo-text">RakshaLink<span class="logo-sub">Help, when you need it most.</span></h1>
-      </div>
-    </div>
-    <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
-    <div class="header-actions">
-      <div class="view-as-wrap">
-        <label>View as</label>
-        <select class="role-select" id="role-select"></select>
-      </div>
-      <label class="on-duty-label">
-        <label class="switch"><input type="checkbox" id="duty-toggle" checked><span class="slider"></span></label>
-        On duty
-      </label>
-      <div class="responder-chip" id="my-name">
-        <div class="r-avatar" id="my-avatar">SC</div>
-        <span id="my-name-text">Sample City Hospital</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="main-area">
-    <aside class="sidebar">
-      <div class="nav-item active">
-        <span style="display:flex; align-items:center; gap:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          Home
-        </span>
-      </div>
-      <div class="nav-item">
-        <span style="display:flex; align-items:center; gap:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-          History
-        </span>
-        <span class="coming-soon">Coming soon</span>
-      </div>
-      <div class="nav-item">
-        <span style="display:flex; align-items:center; gap:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-          Profile
-        </span>
-        <span class="coming-soon">Coming soon</span>
-      </div>
-      <div class="nav-item">
-        <span style="display:flex; align-items:center; gap:12px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          Settings
-        </span>
-        <span class="coming-soon">Coming soon</span>
-      </div>
-    </aside>
-
-    <div class="content" id="main-grid">
-      <!-- Queue -->
-      <div class="card queue-col">
-        <div class="q-header">
-          <h3 class="q-title">Live alert queue <span class="q-badge" id="q-count">0</span></h3>
-          <div class="q-filters">
-            <div class="q-chip active" id="f-all">All <span id="c-all">0</span></div>
-            <div class="q-chip" id="f-med">Medical <span id="c-med">0</span></div>
-            <div class="q-chip" id="f-acc">Accident <span id="c-acc">0</span></div>
-          </div>
-        </div>
-        <div class="q-list" id="q-list"></div>
-        <div class="q-footer">All names, distances and times are sample data.</div>
-      </div>
-      
-      <!-- Rendered Details -->
-      <div id="right-panels" style="display:contents">
-        <div class="empty-state">Select an alert from the queue to view details.</div>
-      </div>
-    </div>
+<header id="top">
+ <div class="logo" id="logo"></div>
+ <div class="demo">DEMO · SIMULATED RESPONDER NETWORK</div>
+ <div class="right">
+  <div><label class="v" for="view">View as</label><select id="view"></select></div>
+  <label class="tg"><input type="checkbox" id="duty" checked><span class="tr"></span><span>On duty</span></label>
+  <div class="org"><span class="av" id="orgAv"></span><span id="orgName"></span></div>
+ </div>
+</header>
+<div id="shell">
+ <nav id="side"><div class="it on" id="navHome"></div>
+  <div class="it" id="navHist"></div><div class="it" id="navProf"></div><div class="it" id="navSet"></div></nav>
+ <main id="main">
+  <section class="card" id="queue">
+   <h2>Live alert queue <span id="qb">0</span></h2><div id="chips"></div><div id="qlist"></div>
+   <div class="tools"><label class="lbl" for="testSel" style="margin-top:0">Demo tool: send a sample alert</label><select id="testSel"></select>
+    <p class="hint" style="margin-top:8px">Sample data. The alert appears at this responder's demo location.</p>
+    <button class="btn white" id="snd" style="min-height:42px;padding:8px 16px;font-size:14px;margin-top:12px">Enable alert sound</button></div>
+  </section>
+  <div id="right">
+   <div class="r1">
+    <section class="card pad" id="detail"></section>
+    <section class="card mapc" id="mapc"><div id="leaf"></div><div id="mapfb"></div><a class="btn white open" id="openMaps" target="_blank" rel="noopener"></a><div class="attr">© OpenStreetMap contributors</div></section>
+   </div>
+   <div class="r2"><section class="card pad" id="prog"></section><section class="card pad" id="acts"></section></div>
+   <section class="card pad" id="log"></section>
   </div>
+ </main>
+</div>
+<script src="/vendor/leaflet/leaflet.js"></script>
+<script src="/shared/common.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id), RL = window.RL, ic = RL.ic, esc = RL.esc;
+const ROLE = { hospital: ['medical', 'accident'], police: ['accident'], mechanic: ['breakdown'], fuel_pump: ['fuel'] };
+const S = { cfg: { presets: [], escalate_after_s: 20 }, resp: [], rid: null, events: [], sel: null, filter: 'all', off: 0, seen: null, sound: false, sig: '' };
+const me = () => S.resp.find(r => r.id === S.rid);
+const cur = () => S.events.find(e => e.id === S.sel) || null;
+const nowS = () => Date.now() + S.off;
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    const COLORS = { medical: 'var(--maroon)', accident: 'var(--navy)', breakdown: 'var(--teal)', fuel: 'var(--green)' };
-    const TITLES = { medical: 'Medical SOS', accident: 'Road Accident', breakdown: 'Vehicle Breakdown', fuel: 'Fuel Shortage' };
-    const ICONS = { medical: '✚', accident: '🚗', breakdown: '🔧', fuel: '⛽' };
+function stateOf(e) {
+  const m = e.my;
+  if (m.status === 'declined') return 'declined'; if (m.status === 'missed') return 'missed';
+  if (e.steps.unanswered && !m.accepted_at) return 'closed';
+  if (m.resolved_at) return 'S4'; if (m.arrived_at) return 'S3'; if (m.enroute_at) return 'S2'; if (m.accepted_at) return 'S1';
+  return 'S0';
+}
+function where(e) { const p = S.cfg.presets.find(p => Math.hypot(p.lat - e.lat, p.lng - e.lng) < 0.02); return p ? p.name : 'Alert location'; }
 
-    let state = { events: [], responders: [], selectedId: null, role: null, filter: 'all' };
-    let map, markerRider, markerResp, routeLine;
-    let timerInterval = null;
+/* ---------- chrome ---------- */
+function chrome() {
+  $('logo').innerHTML = RL.shield('#F5F3EA', '#274706', 40) + '<div><b>RakshaLink</b><small>Help, when you need it most.</small></div>';
+  $('navHome').innerHTML = ic('home', 20) + ' Home';
+  [['navHist', 'clock', 'History'], ['navProf', 'person', 'Profile'], ['navSet', 'gear', 'Settings']].forEach(a => { $(a[0]).innerHTML = ic(a[1], 20) + '<span>' + a[2] + '<small>Coming soon</small></span>'; });
+  $('openMaps').innerHTML = 'Open in Maps ' + ic('ext', 15);
+}
+function topbar() {
+  const groups = {};
+  S.resp.forEach(r => { (groups[r.preset] = groups[r.preset] || []).push(r); });
+  const nm = { campus: 'GNIT campus area', nh19: 'NH-19 sample area' };
+  $('view').innerHTML = Object.keys(groups).map(g => `<optgroup label="${esc(nm[g] || g)}">` + groups[g].map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('') + '</optgroup>').join('');
+  $('view').value = S.rid;
+  const r = me(); if (!r) return;
+  $('orgAv').textContent = r.name.replace('Sample ', '').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  $('orgName').textContent = r.name; $('duty').checked = r.on_duty;
+  const cats = ROLE[r.type] || [];
+  $('testSel').innerHTML = '<option value="">Choose an alert to send…</option>' + cats.map(c => `<option value="${c}">${c === 'accident' ? 'Road accident (automatic crash)' : c === 'medical' ? 'Medical SOS' : RL.CAT[c].label}</option>`).join('');
+}
 
-    function formatTimeAgo(ms) {
-      const mins = Math.floor((Date.now() - ms) / 60000);
-      if (mins < 1) return 'just now';
-      return `${mins} min ago`;
-    }
+/* ---------- data ---------- */
+async function refresh() {
+  if (!S.rid) return;
+  try {
+    const d = await RL.api('/api/events?responder_id=' + encodeURIComponent(S.rid), { timeout: 5000 });
+    S.off = d.server_now - Date.now(); S.events = d.events;
+    const pend = d.events.filter(e => stateOf(e) === 'S0').map(e => e.id);
+    if (S.seen === null) S.seen = new Set(d.events.map(e => e.id));
+    const fresh = pend.filter(id => !S.seen.has(id));
+    d.events.forEach(e => S.seen.add(e.id));
+    if (fresh.length) { if (S.sound) RL.chime(); S.sel = fresh[0]; S.sig = ''; }
+    if (!cur()) S.sel = (S.events.find(e => stateOf(e) === 'S0') || S.events[0] || {}).id || null;
+    render();
+  } catch (e) { }
+}
+async function act(path, body) {
+  try { await RL.api('/api/console/' + S.rid + '/events/' + S.sel + '/' + path, { method: 'POST', body: body || {} }); } catch (e) { alert('Could not do that: ' + e.message); }
+  S.sig = ''; refresh();
+}
+async function sendTest(cat) {
+  const r = me(), pr = S.cfg.presets.find(p => p.id === r.preset) || S.cfg.presets[0];
+  const body = { category: cat, trigger: cat === 'accident' ? 'crash_auto' : 'manual', lat: pr.lat, lng: pr.lng, client_id: RL.uid() };
+  if (cat === 'accident') { body.peak_g = 8.4; body.pre_impact_kmh = 86; }
+  try { await RL.api('/api/sos', { method: 'POST', body }); } catch (e) { alert('Could not send: ' + e.message); }
+  $('testSel').value = ''; refresh();
+}
 
-    function formatTime(ms) {
-      const d = new Date(ms);
-      return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
-    }
+/* ---------- render ---------- */
+function render() { renderQueue(); renderDetail(); renderCards(); renderLog(); drawMap(); tickCd(); }
+function renderQueue() {
+  const r = me(), cats = ROLE[r.type] || [];
+  const list = S.events.filter(e => S.filter === 'all' || e.category === S.filter);
+  $('qb').textContent = S.events.filter(e => stateOf(e) === 'S0').length;
+  $('chips').innerHTML = `<button class="fc ${S.filter === 'all' ? 'on' : ''}" data-f="all">All ${S.events.length}</button>` + cats.map(c => `<button class="fc ${S.filter === c ? 'on' : ''}" data-f="${c}">${c[0].toUpperCase() + c.slice(1)} ${S.events.filter(e => e.category === c).length}</button>`).join('');
+  if (!r.on_duty) { $('qlist').innerHTML = '<div class="empty">You are off duty.<br>No alerts are matched to you.</div>'; return; }
+  if (!list.length) { $('qlist').innerHTML = '<div class="empty">No alerts yet.<br>They appear here instantly.</div>'; return; }
+  const sub = { S0: '', S1: 'Accepted by you', S2: 'On the way', S3: 'Arrived', S4: 'Resolved', missed: 'Escalated to next responder', declined: 'You declined', closed: 'Closed, nobody answered' };
+  $('qlist').innerHTML = list.map(e => {
+    const c = RL.CAT[e.category], st = stateOf(e), tr = e.trigger === 'crash_auto' ? '<span class="chip navy">Automatic crash</span>' : '<span class="chip">Manual</span>';
+    return `<button class="qr ${e.id === S.sel ? 'sel' : ''} ${['missed', 'declined', 'closed'].includes(st) ? 'gone' : ''}" data-id="${e.id}"><span class="disc ${c.color}">${ic(c.icon)}</span><span style="min-width:0"><span class="t">${esc(e.label)}</span><div class="m">${tr}${e.delivered_from_queue ? ' <span class="chip amber">From queue</span>' : ''}</div>${sub[st] ? `<div class="m" style="color:var(--green);font-weight:700">${esc(sub[st])}</div>` : ''}</span><span class="r"><b>${RL.km(e.my.distance_m)}</b>${RL.ago(nowS() - e.created_at)}</span></button>`;
+  }).join('');
+}
+function renderDetail() {
+  const r = me(), e = cur(), box = $('detail');
+  if (!r.on_duty) { box.innerHTML = `<div class="empty">${RL.shield('#274706', '#F5F3EA', 72)}<h2>You are off duty</h2><p>You will not receive alerts.</p><button class="btn primary" id="goDuty" style="margin-top:18px">Go on duty</button></div>`; $('goDuty').onclick = () => setDuty(true); return; }
+  if (!e) { box.innerHTML = `<div class="empty">${RL.shield('#274706', '#F5F3EA', 72)}<h2>You are on duty</h2><p>New alerts appear here instantly. Tap a tile on the rider app, or use the demo tool on the left to send a sample alert.</p></div>`; return; }
+  const st = stateOf(e), m = e.my, c = RL.CAT[e.category];
+  const banner = { S1: 'Alert accepted', S2: 'On the way', S3: 'Arrived', S4: 'Resolved' }[st];
+  const trig = e.trigger === 'crash_auto' ? '<span class="chip navy">Automatic crash</span>' : '<span class="chip">Manual</span>';
+  const rep = `<span class="muted" style="font-size:14px">Reported ${RL.ago(nowS() - e.created_at)}${banner ? '' : ' · via RakshaLink ' + (e.delivered_from_queue ? 'app (delivered from queue)' : 'app')}</span>`;
+  const sub = banner ? `<span class="pill">${ic('check', 14)} ${banner}</span> ${rep}` : rep;
+  let crash = '';
+  if (e.trigger === 'crash_auto') crash = `<div class="crash"><h4>${ic('car', 18)} Automatic crash alert</h4><p>Hard impact and sudden stop detected.<br><b>Victim may be unresponsive.</b></p>${e.peak_g != null ? `<div class="mm"><div><small>Peak impact</small><b>${e.peak_g} g</b></div><div><small>Speed before impact</small><b>${e.pre_impact_kmh} km/h</b></div><small style="align-self:flex-end">sample values</small></div>` : ''}</div>`;
+  let btns = '', hint = '';
+  if (st === 'S0') { btns = `<div class="go"><button class="btn primary big" id="bAcc">${ic('check', 20)} Accept alert</button><div class="two"><div class="cdb"><small>Escalates in</small><b id="cdv">--:--</b></div><button class="btn danger" id="bDec">Can't respond</button></div></div>`; hint = 'If nobody accepts, this alert goes to the next-nearest responder.'; }
+  else if (st === 'S1') { btns = `<div class="go"><button class="btn primary big" id="bStep" data-s="enroute">${ic('car', 20)} On my way</button></div>`; hint = 'Tap when you leave. The caller sees each step you mark.'; }
+  else if (st === 'S2') { btns = `<div class="go"><button class="btn primary big" id="bStep" data-s="arrived">${ic('pin', 20)} Arrived</button></div>`; hint = 'Tap when you reach the scene. The caller sees each step you mark.'; }
+  else if (st === 'S3') { btns = `<div class="go"><button class="btn primary big" id="bStep" data-s="resolved">${ic('check', 20)} Resolved</button></div>`; hint = 'Tap when the incident is handled.'; }
+  else if (st === 'S4') { btns = `<div class="go"><div class="two"><button class="btn" disabled>${ic('check', 18)} Resolved</button><button class="btn ghost" id="bBack">Back to alerts</button></div></div>`; }
+  else { const msg = { missed: 'This alert was escalated to the next responder because there was no response in time.', declined: 'You declined this alert. It was passed to the next responder.', closed: 'No responder answered. The rider was told to call 112.' }[st]; btns = `<div class="go"><div class="pill gray" style="white-space:normal;border-radius:14px;padding:12px 16px">${msg}</div></div>`; }
+  const link = ['S0', 'S1', 'S2', 'S3'].includes(st) && m.accept_url ? `<div class="hint">${hint}<br><a href="${esc(m.accept_url)}" target="_blank" rel="noopener">Open the SMS accept page (phone view)</a></div>` : (hint ? `<div class="hint">${hint}</div>` : '');
+  box.innerHTML = `<div class="dh"><span class="disc ${c.color}" style="width:56px;height:56px">${ic(c.icon, 26)}</span><div><h2>${esc(e.label)}</h2><div style="margin-top:6px">${trig}</div></div></div><div style="margin-top:12px">${sub}</div>
+  <div class="where"><div style="display:flex;gap:12px">${ic('pin', 22, 'var(--navy)')}<div><small>Victim location</small><b>${esc(where(e))}</b><small>${e.lat.toFixed(4)}° N, ${e.lng.toFixed(4)}° E</small></div></div><div><small>Distance from you</small><b class="serif" style="font-size:26px">${RL.km(m.distance_m)}</b><small>straight-line</small></div></div>${crash}${btns}${link}`;
+  if ($('bAcc')) { $('bAcc').onclick = () => act('accept'); $('bDec').onclick = () => act('decline'); }
+  if ($('bStep')) $('bStep').onclick = () => act('status', { step: $('bStep').dataset.s });
+  if ($('bBack')) $('bBack').onclick = () => { S.sel = null; refresh(); };
+}
+function renderCards() {
+  const r = me(), e = cur(), st = e ? stateOf(e) : null, m = e && e.my;
+  const done = { Notified: !!e, Accepted: !!(m && m.accepted_at), 'On the way': !!(m && m.enroute_at), Arrived: !!(m && m.arrived_at), Resolved: !!(m && m.resolved_at) };
+  $('prog').innerHTML = `<h3>Response progress</h3><p class="muted" style="font-size:14px;margin:-6px 0 16px">Responding as <b>${esc(r.name)}</b> (${esc(RL.TYPE[r.type])})</p><ul class="steps">${Object.keys(done).map(k => `<li class="${done[k] ? 'done' : ''}">${k}</li>`).join('')}</ul><div class="est">Your estimate (shown to the caller)<b>${m && m.eta_minutes ? m.eta_minutes + ' min' : 'Not available yet'}</b></div>`;
+  const sig = (e ? e.id : '') + '|' + st + '|' + (m ? m.eta_minutes : '');
+  if (sig === S.sig) return; S.sig = sig;
+  const nxt = { S1: 'enroute', S2: 'arrived', S3: 'resolved' }[st], can = ['S1', 'S2', 'S3'].includes(st);
+  const b = (k, lab, ico) => `<button class="btn ${nxt === k ? 'primary' : ''}" data-step="${k}" ${nxt === k ? '' : 'disabled'}>${ic(ico, 18)} ${lab}</button>`;
+  $('acts').innerHTML = `<h3>Responder actions</h3><div class="stack">${b('enroute', 'On my way', 'car')}${b('arrived', 'Arrived', 'pin')}${b('resolved', 'Resolved', 'check')}</div><label class="lbl" for="eta">Your estimate in minutes (optional)</label><div class="inp"><input id="eta" type="number" min="1" max="180" placeholder="e.g. 8" ${can ? '' : 'disabled'} value="${m && m.eta_minutes ? m.eta_minutes : ''}"><button class="btn primary" id="etaGo" ${can ? '' : 'disabled'}>Update</button></div><div class="hint">The caller sees this as your own estimate. The system never computes an ETA.</div>`;
+  $('acts').querySelectorAll('[data-step]:not(:disabled)').forEach(x => { x.onclick = () => act('status', { step: x.dataset.step }); });
+  if (can) $('etaGo').onclick = () => { const v = $('eta').value; if (v) act('status', { eta_minutes: Number(v) }); };
+}
+function renderLog() {
+  const e = cur(), rows = e ? e.event_log : [];
+  $('log').innerHTML = `<h3>Event log</h3><table><thead><tr><th>Time</th><th>Event</th><th>Details</th><th>By</th></tr></thead><tbody>${rows.length ? rows.slice().reverse().map(l => `<tr><td>${RL.hms(l.time)}</td><td><b>${esc(l.event)}</b></td><td>${esc(l.details)}</td><td class="muted">${esc(l.by)}</td></tr>`).join('') : '<tr><td colspan="4" class="muted">No events yet.</td></tr>'}</tbody></table>`;
+}
+function tickCd() { const e = cur(), el = $('cdv'); if (!el || !e || !e.my.escalate_at) return; el.textContent = RL.mmss((e.my.escalate_at - nowS()) / 1000); }
 
-    async function fetchData() {
-      const evRes = await fetch('/api/events');
-      state.events = (await evRes.json()).sort((a,b) => b.created_at - a.created_at);
-      
-      const respRes = await fetch('/api/responders');
-      state.responders = await respRes.json();
-      
-      const sel = document.getElementById('role-select');
-      if (sel.options.length === 0) {
-        state.responders.forEach(r => {
-          const opt = document.createElement('option');
-          opt.value = r.id; 
-          opt.textContent = `${r.type.charAt(0).toUpperCase() + r.type.slice(1)} (${r.name})`;
-          sel.appendChild(opt);
-        });
-        const defaultResp = state.responders.find(r => r.type === 'hospital');
-        if (defaultResp) {
-          sel.value = defaultResp.id;
-          state.role = defaultResp.id;
-        } else if (state.responders.length > 0) {
-          sel.value = state.responders[0].id;
-          state.role = state.responders[0].id;
-        }
-      }
-      render();
-    }
+/* ---------- map: bundled Leaflet + OpenStreetMap tiles; a drawn map takes over if tiles cannot load ---------- */
+const M = { map: null, layer: null, key: '', ok: 0, err: 0, noTiles: false };
+function drawMap(force) {
+  const e = cur(), r = me(); if (!r) return;
+  const key = (e ? e.id : '-') + '|' + r.id + '|' + (M.noTiles ? 1 : 0);
+  if (!force && key === M.key) return; M.key = key;
+  const v = e ? [e.lat, e.lng] : null, b = [r.lat, r.lng], at = v || b;
+  $('openMaps').href = 'https://www.openstreetmap.org/?mlat=' + at[0] + '&mlon=' + at[1] + '#map=15/' + at[0] + '/' + at[1];
+  const km = e ? RL.km(e.my.distance_m) + ' straight-line' : '';
+  if (!window.L || M.noTiles) { $('leaf').style.display = 'none'; $('mapfb').style.display = 'block'; $('mapfb').innerHTML = fallbackSVG(v, b, km, e); return; }
+  $('mapfb').style.display = 'none'; $('leaf').style.display = 'block';
+  if (!M.map) {
+    M.map = L.map('leaf', { zoomControl: true, attributionControl: false });
+    const t = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(M.map);
+    t.on('tileload', () => { M.ok++; }); t.on('tileerror', () => { M.err++; if (M.err >= 4 && M.ok === 0 && !M.noTiles) { M.noTiles = true; drawMap(true); } });
+    M.layer = L.layerGroup().addTo(M.map);
+  }
+  M.layer.clearLayers(); M.map.invalidateSize();
+  const col = e ? RL.COL[RL.CAT[e.category].color] : '#2B3A67';
+  L.circleMarker(b, { radius: 11, color: '#F5F3EA', weight: 3, fillColor: '#274706', fillOpacity: 1 }).bindTooltip('You', { permanent: true, direction: 'top', className: 'tt green' }).addTo(M.layer);
+  if (v) {
+    L.circleMarker(v, { radius: 24, stroke: false, fillColor: col, fillOpacity: .15 }).addTo(M.layer);
+    L.circleMarker(v, { radius: 12, color: '#F5F3EA', weight: 3, fillColor: col, fillOpacity: 1 }).bindTooltip('Accident location', { permanent: true, direction: 'top', className: 'tt' }).addTo(M.layer);
+    L.polyline([v, b], { color: col, weight: 3, dashArray: '8 8' }).bindTooltip(km, { permanent: true, direction: 'center', className: 'tt' }).addTo(M.layer);
+    M.map.fitBounds([v, b], { padding: [70, 70], maxZoom: 16 });
+  } else M.map.setView(b, 14);
+}
+function fallbackSVG(v, b, label, e) {
+  const W = Math.max(320, $('mapc').clientWidth || 480), H = Math.max(380, $('mapc').clientHeight || 440), p = Math.min(W, H) * 0.24, pts = v ? [v, b] : [b];
+  const la0 = pts.reduce((s, q) => s + q[0], 0) / pts.length, lo0 = pts.reduce((s, q) => s + q[1], 0) / pts.length;
+  const xy = q => [(q[1] - lo0) * Math.cos(la0 * Math.PI / 180) * 111320, -(q[0] - la0) * 110540];
+  const P = pts.map(xy), span = Math.max(1, ...P.map(a => Math.abs(a[0])), ...P.map(a => Math.abs(a[1]))) * 2;
+  const sc = (Math.min(W, H) - 2 * p) / span, pos = a => [W / 2 + a[0] * sc, H / 2 + a[1] * sc];
+  const B = pos(xy(b)), V = v ? pos(xy(v)) : null, col = e ? RL.COL[RL.CAT[e.category].color] : '#2B3A67', sx = W / 480, sy = H / 440;
+  let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Drawn map of the alert and your base"><rect width="${W}" height="${H}" fill="#E6E1CF"/><g transform="scale(${sx} ${sy})">`;
+  [[20, 20, 120, 80], [160, 30, 100, 70], [280, 20, 130, 90], [30, 120, 90, 100], [270, 130, 130, 70], [40, 280, 130, 80], [220, 250, 100, 100], [340, 290, 90, 120]].forEach(q => { o += `<rect x="${q[0]}" y="${q[1]}" width="${q[2]}" height="${q[3]}" rx="8" fill="#EFEBDD"/>`; });
+  o += `<path d="M-10 100 C130 140 190 280 490 340 L490 395 C210 330 150 200 -10 155Z" fill="#BCD7D5"/><path d="M0 330 L480 275" stroke="#fff" stroke-width="10"/><path d="M0 330 L480 275" stroke="#E3B95F" stroke-width="5"/><path d="M70 0 L120 440M260 0 L215 440" stroke="#fff" stroke-width="7"/></g>`;
+  o += `<text x="${W / 2}" y="${H - 40}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="12.5" fill="#5E6B57">Drawn map (online tiles unavailable)</text>`;
+  const tag = (x, y, w, t, fill, fg) => `<rect x="${Math.max(6, Math.min(W - w - 6, x - w / 2))}" y="${y}" width="${w}" height="26" rx="13" fill="${fill}"/><text x="${Math.max(6, Math.min(W - w - 6, x - w / 2)) + w / 2}" y="${y + 18}" fill="${fg}">${t}</text>`;
+  o += `<g font-family="DM Sans,sans-serif" font-weight="700" font-size="13" text-anchor="middle"><circle cx="${B[0]}" cy="${B[1]}" r="12" fill="#274706" stroke="#F5F3EA" stroke-width="3"/>${tag(B[0], B[1] - 46, 46, 'You', '#274706', '#F5F3EA')}`;
+  if (V) o += `<path d="M${V[0]} ${V[1]} L${B[0]} ${B[1]}" stroke="${col}" stroke-width="3" stroke-dasharray="8 8"/><circle cx="${V[0]}" cy="${V[1]}" r="26" fill="${col}" opacity=".15"/><circle cx="${V[0]}" cy="${V[1]}" r="12" fill="${col}" stroke="#F5F3EA" stroke-width="3"/>${tag(V[0], V[1] - 48, 132, 'Accident location', col, '#fff')}${tag((V[0] + B[0]) / 2, (V[1] + B[1]) / 2 - 13, 156, esc(label), '#FBF9F2', '#1C2A12')}`;
+  return o + '</g></svg>';
+}
 
-    function connectSSE() {
-      const evtSource = new EventSource('/api/stream');
-      evtSource.onmessage = () => fetchData();
-      evtSource.onerror = () => setTimeout(fetchData, 3000);
-    }
-
-    function getFilteredEvents() {
-      const me = state.responders.find(r => r.id === state.role);
-      if (!me) return [];
-      
-      // Role filter
-      let events = state.events.filter(ev => {
-        if (me.type === 'hospital') return ev.category === 'medical' || ev.category === 'accident';
-        if (me.type === 'police') return ev.category === 'accident';
-        if (me.type === 'mechanic') return ev.category === 'breakdown';
-        if (me.type === 'fuel_pump') return ev.category === 'fuel';
-        return false;
-      });
-      
-      // Tab filter
-      if (state.filter === 'med') events = events.filter(e => e.category === 'medical');
-      if (state.filter === 'acc') events = events.filter(e => e.category === 'accident');
-      return events;
-    }
-
-    function renderQueue() {
-      const allEv = getFilteredEvents();
-      const medCount = allEv.filter(e=>e.category==='medical').length;
-      const accCount = allEv.filter(e=>e.category==='accident').length;
-      
-      document.getElementById('q-count').textContent = allEv.filter(e=>!e.steps.resolved).length;
-      document.getElementById('c-all').textContent = allEv.length;
-      document.getElementById('c-med').textContent = medCount;
-      document.getElementById('c-acc').textContent = accCount;
-      
-      const qList = document.getElementById('q-list');
-      qList.innerHTML = '';
-      
-      allEv.forEach(ev => {
-        const isActive = ev.id === state.selectedId;
-        const color = COLORS[ev.category];
-        const title = TITLES[ev.category];
-        const myDispatch = (ev.dispatches || []).find(d => d.responderId === state.role);
-        const distText = myDispatch ? `${(myDispatch.distance_m/1000).toFixed(1)} km` : 'Distance unknown';
-        
-        let pill = ev.trigger === 'crash_auto' ? `<div class="q-pill auto">Automatic crash</div>` : `<div class="q-pill manual">Manual</div>`;
-        if (ev.steps.accepted && myDispatch && myDispatch.status !== 'pending' && myDispatch.status !== 'declined') {
-          pill = `<div class="q-pill" style="background:#e2f4cf; color:var(--green)">Accepted by you</div>`;
-        }
-        
-        const div = document.createElement('div');
-        div.className = `q-item ${isActive ? 'active' : ''}`;
-        div.onclick = () => { state.selectedId = ev.id; render(); };
-        
-        div.innerHTML = `
-          <div class="q-icon" style="background:${color}">${ICONS[ev.category]}</div>
-          <div class="q-info">
-            <h4 class="q-item-title">${title}</h4>
-            ${pill}
-            <div class="q-loc">Sample location</div>
-          </div>
-          <div class="q-right">
-            <div class="q-dist">${distText}</div>
-            <div class="q-time">${formatTimeAgo(ev.created_at)}</div>
-          </div>
-        `;
-        qList.appendChild(div);
-      });
-    }
-
-    function generateLogRows(ev, me) {
-      const rows = [];
-      rows.push({ time: ev.created_at, event: 'Alert received', details: `${TITLES[ev.category]}, ${ev.trigger==='crash_auto'?'automatic crash':'manual'} (demo location)`, by: 'System' });
-      
-      const dispatches = ev.dispatches || [];
-      if (dispatches.length > 0) {
-        const names = dispatches.map(d => {
-          const r = state.responders.find(x=>x.id===d.responderId);
-          return r ? `${r.name} ${(d.distance_m/1000).toFixed(1)} km` : 'Unknown';
-        }).join(', ');
-        rows.push({ time: dispatches[0].created_at, event: 'Matching complete', details: names, by: 'System' });
-      }
-      
-      dispatches.forEach(d => {
-        const rName = state.responders.find(x=>x.id===d.responderId)?.name || 'Unknown';
-        rows.push({ time: d.created_at, event: 'Responder notified', details: rName, by: 'System' });
-        if (d.accepted_at) rows.push({ time: d.accepted_at, event: 'Alert accepted', details: '', by: rName });
-        if (d.declined_at) rows.push({ time: d.declined_at, event: 'Responder declined', details: '', by: rName });
-      });
-
-      if (ev.status_log) {
-        ev.status_log.forEach(l => {
-          let evtName = '';
-          if(l.step==='enroute') evtName='On the way';
-          if(l.step==='arrived') evtName='Arrived';
-          if(l.step==='resolved') evtName='Resolved';
-          const rName = state.responders.find(x=>x.id===ev.accepted_by)?.name || 'Unknown';
-          rows.push({ time: l.timestamp, event: evtName, details: l.eta_minutes ? `Estimate: ${l.eta_minutes} min` : '', by: rName });
-        });
-      }
-
-      return rows.sort((a,b) => a.time - b.time);
-    }
-
-    function renderDetail() {
-      const me = state.responders.find(r => r.id === state.role);
-      const panels = document.getElementById('right-panels');
-      
-      const ev = getFilteredEvents().find(e => e.id === state.selectedId);
-      if (!ev || !me) {
-        panels.innerHTML = '<div class="empty-state">Select an alert from the queue to view details.</div>';
-        return;
-      }
-
-      const myDispatch = (ev.dispatches || []).find(d => d.responderId === state.role);
-      const distKm = myDispatch ? (myDispatch.distance_m/1000).toFixed(1) : '0.0';
-      const color = COLORS[ev.category];
-
-      let uiState = 'S0';
-      if (ev.steps.resolved) uiState = 'S4';
-      else if (ev.steps.arrived) uiState = 'S3';
-      else if (ev.steps.enroute) uiState = 'S2';
-      else if (ev.steps.accepted) uiState = 'S1';
-
-      // Detail Card
-      let crashBox = '';
-      if (ev.trigger === 'crash_auto') {
-        crashBox = `
-        <div class="crash-box">
-          <h4>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M9 3v18"></path></svg>
-            Automatic crash alert
-          </h4>
-          <p>Hard impact and sudden stop detected.</p>
-          <div class="unresponsive">Victim may be unresponsive.</div>
-          <div class="crash-stats">
-            <div class="crash-stat-item"><label>Peak impact</label><val>${ev.peak_g} g</val></div>
-            <div class="crash-stat-item"><label>Speed before impact</label><val>${ev.pre_impact_kmh} km/h</val></div>
-            <div class="sample-label">sample values</div>
-          </div>
-        </div>`;
-      }
-
-      let btnRow = '';
-      if (uiState === 'S0' && myDispatch && myDispatch.status === 'pending') {
-        btnRow = `
-        <div class="action-row">
-          <button class="btn btn-green" onclick="postAction('${myDispatch.token}', 'accept')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Accept alert
-          </button>
-          <div class="escalate-box">
-            <label>Escalates in</label>
-            <val id="countdown-val">00:20</val>
-          </div>
-          <button class="btn btn-outline-red" style="width: auto; padding: 16px 24px;" onclick="postAction('${myDispatch.token}', 'decline')">Can't respond</button>
-        </div>
-        <div class="helper-text">If nobody accepts, this alert goes to the next-nearest responder.</div>
-        `;
-        
-        // Start countdown
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-          const limit = ev.created_at + 20000;
-          const left = Math.max(0, Math.floor((limit - Date.now())/1000));
-          const el = document.getElementById('countdown-val');
-          if(el) el.textContent = `00:${left.toString().padStart(2,'0')}`;
-          if(left <= 0) clearInterval(timerInterval);
-        }, 1000);
-      } else if (ev.steps.accepted) {
-        btnRow = `<div class="status-chip">✓ Alert accepted</div>`;
-      }
-
-      const mapHtml = `
-        <div class="card map-card">
-          <a href="https://www.openstreetmap.org/?mlat=${ev.lat}&mlon=${ev.lng}#map=15/${ev.lat}/${ev.lng}" target="_blank" class="map-overlay-btn">Open in Maps ↗</a>
-          <div id="map"></div>
-        </div>
-      `;
-
-      // Info Card
-      const infoCard = `
-        <div class="card info-card">
-          <h3 class="card-title">Responder information</h3>
-          <div class="r-info-header">
-            <div class="r-info-avatar">${me.name.substring(0,2).toUpperCase()}</div>
-            <div>
-              <h4 class="r-info-name">${me.name}</h4>
-              <p class="r-info-type">${me.type.charAt(0).toUpperCase() + me.type.slice(1)} responder</p>
-            </div>
-          </div>
-          <div class="chip-row">
-            <div class="mini-chip duty">● On duty</div>
-            <div class="mini-chip" style="text-transform:capitalize;">${me.type}</div>
-          </div>
-          <div class="info-dist">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            ${distKm} km straight-line
-          </div>
-        </div>
-      `;
-
-      // Progress Card
-      const progCard = `
-        <div class="card progress-card">
-          <h3 class="card-title">Response progress</h3>
-          <div class="progress-layout">
-            <div class="progress-steps">
-              <div class="p-step checked"><div class="p-icon"></div> Notified</div>
-              <div class="p-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
-              <div class="p-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
-              <div class="p-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
-              <div class="p-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
-            </div>
-            <div class="estimate-box">
-              <label>Your estimate<br><span style="font-size:9px;color:var(--mute)">(shown to the caller)</span></label>
-              <val>${ev.responder_eta_minutes ? ev.responder_eta_minutes + ' min' : 'Not available yet'}</val>
-            </div>
-          </div>
-        </div>
-      `;
-
-      // Actions Card
-      const isMyAlert = myDispatch && ev.accepted_by === state.role;
-      const canEnroute = isMyAlert && uiState === 'S1';
-      const canArrive = isMyAlert && uiState === 'S2';
-      const canResolve = isMyAlert && uiState === 'S3';
-
-      let actCard = `
-        <div class="card actions-card">
-          <h3 class="card-title">Responder actions</h3>
-          <p style="font-size:13px; color:var(--ink); margin: 0 0 12px 0;">Update status</p>
-          <div class="action-grid">
-            <button class="btn-sm ${canEnroute?'active':''}" ${canEnroute?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'enroute')">On my way</button>
-            <button class="btn-sm ${canArrive?'active':''}" ${canArrive?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'arrived')">Arrived</button>
-            <button class="btn-sm ${canResolve?'active':''}" ${canResolve?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'resolved')">Resolved</button>
-          </div>
-      `;
-      
-      if (uiState === 'S4') {
-        actCard += `<button class="btn btn-outline-red" style="width:100%; border-color:var(--line); color:var(--ink); margin-top: 16px;" onclick="state.selectedId=null;render()">Back to alerts</button>`;
-      } else {
-        actCard += `
-          <div class="action-input-row">
-            <input type="number" id="eta-input" class="input-field" placeholder="e.g. 8 min (optional)" ${isMyAlert?'':'disabled'}>
-            <button class="btn-sm" style="background:#e0e4db; color:var(--mute);" ${isMyAlert?'':'disabled'} onclick="postStatus('${myDispatch?.token}', 'enroute')">Update</button>
-          </div>
-        `;
-      }
-      actCard += `</div>`;
-
-      // Log Card
-      const logRows = generateLogRows(ev, me);
-      const logCard = `
-        <div class="card log-card">
-          <h3 class="card-title">Event log</h3>
-          <table>
-            <thead>
-              <tr><th>Time</th><th>Event</th><th>Details</th><th>By</th></tr>
-            </thead>
-            <tbody>
-              ${logRows.map(r => `
-                <tr>
-                  <td>${formatTime(r.time)}</td>
-                  <td class="ev-col">${r.event}</td>
-                  <td>${r.details}</td>
-                  <td>${r.by}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
-
-      panels.innerHTML = `
-        <div class="card detail-card">
-          <div class="d-header">
-            <div class="d-icon" style="background:${color}">${ICONS[ev.category]}</div>
-            <div class="d-title-area">
-              <h2 class="d-title">${TITLES[ev.category]} ${ev.trigger==='crash_auto' ? `<div class="q-pill auto" style="margin:0; font-size:12px; font-family:var(--font-sans)">Automatic crash</div>` : ''}</h2>
-              <div class="d-reported">Reported ${formatTimeAgo(ev.created_at)} • via RakshaLink app</div>
-            </div>
-          </div>
-          <div class="d-loc-block">
-            <div class="d-loc-left">
-              <h4>Victim location</h4>
-              <p>GNIT campus, Sodepur (demo)</p>
-              <span>${ev.lat}° N, ${ev.lng}° E</span>
-            </div>
-            <div class="d-loc-right">
-              <h4>Distance from you</h4>
-              <p>${distKm} km</p>
-              <span>straight-line</span>
-            </div>
-          </div>
-          ${crashBox}
-          ${btnRow}
-        </div>
-        ${mapHtml}
-        ${infoCard}
-        ${progCard}
-        ${actCard}
-        ${logCard}
-      `;
-
-      // Setup Map
-      setTimeout(() => {
-        if (!map) {
-          map = L.map('map').setView([ev.lat, ev.lng], 13);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
-        }
-        
-        if (markerRider) map.removeLayer(markerRider);
-        if (markerResp) map.removeLayer(markerResp);
-        if (routeLine) map.removeLayer(routeLine);
-
-        const customIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:${color}; width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;">${ICONS[ev.category]}</div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
-        markerRider = L.marker([ev.lat, ev.lng], {icon: customIcon}).bindTooltip("Accident location", {permanent:true, direction:"top", className:"map-lbl"}).addTo(map);
-
-        if (me) {
-          const youIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background:var(--green); width:24px; height:24px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; color:white; font-size:12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>`, iconSize: [24, 24], iconAnchor: [12, 12] });
-          markerResp = L.marker([me.lat, me.lng], {icon: youIcon}).bindTooltip("You", {permanent:true, direction:"top", className:"map-lbl map-lbl-green"}).addTo(map);
-          routeLine = L.polyline([[ev.lat, ev.lng], [me.lat, me.lng]], {color: 'var(--mute)', weight: 3, dashArray: '8, 8'}).addTo(map);
-          map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
-        }
-      }, 0);
-    }
-
-    // Add map styles dynamically
-    const mapStyle = document.createElement('style');
-    mapStyle.innerHTML = `.map-lbl { background: var(--navy); color: white; border: none; font-weight: 700; border-radius: 99px; padding: 4px 12px; font-family: var(--font-sans); } .map-lbl-green { background: var(--green); } .leaflet-tooltip::before { border-top-color: transparent !important; }`;
-    document.head.appendChild(mapStyle);
-
-    function render() {
-      // Header
-      const me = state.responders.find(r => r.id === state.role);
-      document.getElementById('my-name-text').textContent = me ? me.name : 'Guest';
-      document.getElementById('my-avatar').textContent = me ? me.name.substring(0,2).toUpperCase() : 'G';
-      
-      renderQueue();
-      renderDetail();
-    }
-
-    async function postAction(token, action) {
-      if(!token) return;
-      await fetch(`/api/r/${token}/${action}`, {method:'POST'});
-      if (action === 'decline') state.selectedId = null;
-      fetchData();
-    }
-    async function postStatus(token, step) {
-      if(!token) return;
-      const payload = { step };
-      const eta = document.getElementById('eta-input')?.value;
-      if (eta) payload.eta_minutes = parseInt(eta);
-      await fetch(`/api/r/${token}/status`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
-      fetchData();
-    }
-
-    document.getElementById('role-select').onchange = (e) => { state.role = e.target.value; render(); };
-    document.getElementById('duty-toggle').onchange = async (e) => {
-      if (state.role) await fetch(`/api/responders/${state.role}/duty`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({on_duty:e.target.checked})});
-    };
-    document.getElementById('f-all').onclick = () => { state.filter = 'all'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-all').classList.add('active'); render(); };
-    document.getElementById('f-med').onclick = () => { state.filter = 'med'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-med').classList.add('active'); render(); };
-    document.getElementById('f-acc').onclick = () => { state.filter = 'acc'; document.querySelectorAll('.q-chip').forEach(c=>c.classList.remove('active')); document.getElementById('f-acc').classList.add('active'); render(); };
-
-    fetchData();
-    connectSSE();
-  </script>
-</body>
-</html>
+/* ---------- wiring ---------- */
+async function setDuty(on) { try { await RL.api('/api/responders/' + S.rid + '/duty', { method: 'POST', body: { on_duty: on } }); me().on_duty = on; S.sig = ''; topbar(); refresh(); } catch (e) { } }
+$('duty').onchange = e => setDuty(e.target.checked);
+$('view').onchange = e => { S.rid = e.target.value; RL.store.set('rl_view', S.rid); S.sel = null; S.seen = null; S.filter = 'all'; S.sig = ''; topbar(); refresh(); };
+$('chips').onclick = e => { const b = e.target.closest('[data-f]'); if (b) { S.filter = b.dataset.f; renderQueue(); } };
+$('qlist').onclick = e => { const b = e.target.closest('[data-id]'); if (b) { S.sel = b.dataset.id; S.sig = ''; render(); } };
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { M.key = ''; drawMap(); }, 200); });
+$('testSel').onchange = e => { if (e.target.value) sendTest(e.target.value); };
+$('snd').onclick = () => { RL.unlockAudio(); S.sound = !S.sound; $('snd').textContent = S.sound ? 'Alert sound is on' : 'Enable alert sound'; if (S.sound) RL.chime(); };
+function connect() {
+  if (!window.EventSource) return;
+  try { const es = new EventSource('/api/stream'); ['alert', 'status', 'escalated', 'unanswered', 'duty', 'reset'].forEach(n => es.addEventListener(n, () => { if (n === 'reset') { S.seen = null; S.sel = null; S.sig = ''; loadResp(); } refresh(); })); } catch (e) { }
+}
+async function loadResp() { S.resp = await RL.api('/api/responders'); topbar(); }
+(async function init() {
+  chrome();
+  try { S.cfg = await RL.api('/api/config'); S.resp = await RL.api('/api/responders'); } catch (e) { $('qlist').innerHTML = '<div class="empty">Cannot reach the server.<br>Start it with <b>npm start</b> and open this page from http://localhost:3000.</div>'; return; }
+  const saved = RL.store.get('rl_view', null);
+  S.rid = (S.resp.find(r => r.id === saved) || S.resp.find(r => r.type === 'hospital') || S.resp[0]).id;
+  topbar(); await refresh(); connect();
+  setInterval(refresh, 3000); setInterval(tickCd, 500);
+})();
+window.__console = { S, stateOf, refresh, M };
+})();
+</script></body></html>

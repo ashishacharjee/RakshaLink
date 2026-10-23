@@ -1,352 +1,282 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>RakshaLink Rider App</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #EFEBDD;
-      --surface: #FBF9F2;
-      --ink: #1C2A12;
-      --mute: #5E6B57;
-      --line: rgba(39,71,6,0.14);
-      --green: #274706;
-      --teal: #1B4D4F;
-      --navy: #2B3A67;
-      --maroon: #5B1F2D;
-      --amber: #D9B25C;
-      --error: #ba1a1a;
-      --font-serif: 'Noto Serif', Georgia, serif;
-      --font-sans: 'DM Sans', system-ui, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { 
-      margin: 0; 
-      padding: 20px; 
-      font-family: var(--font-sans); 
-      background: var(--bg); 
-      color: var(--ink);
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-    }
-    .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; }
-    
-    header { display: flex; align-items: center; gap: 12px; }
-    .logo-icon { width: 40px; height: 40px; background: var(--green); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;}
-    .title { font-family: var(--font-serif); font-size: 24px; font-weight: 600; margin: 0; color: var(--ink); }
-    .subtitle { color: var(--mute); font-weight: 500; font-size: 14px; }
-    
-    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 8px; border-radius: 8px; font-size: 12px; text-align: center; letter-spacing: 0.5px; }
-
-    .card { background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid var(--line); }
-    .loc-title { font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-    .loc-val { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
-    
-    .preset-toggle { display: flex; background: var(--bg); border-radius: 8px; padding: 4px; }
-    .preset-btn { flex: 1; padding: 10px; border: none; background: transparent; font-weight: 600; font-size: 14px; cursor: pointer; color: var(--mute); font-family: var(--font-sans); border-radius: 6px; transition: 0.2s; }
-    .preset-btn.active { background: #fff; color: var(--ink); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .tile { 
-      background: #fff; 
-      border: 1px solid var(--line); 
-      border-radius: 16px; 
-      padding: 24px 16px; 
-      cursor: pointer; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      gap: 12px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-      transition: 0.2s;
-    }
-    .tile:active { transform: scale(0.96); }
-    .tile-icon { font-size: 32px; }
-    .tile-label { font-family: var(--font-sans); font-size: 16px; font-weight: 700; }
-    .tile-medical { color: var(--maroon); }
-    .tile-accident { color: var(--navy); }
-    .tile-breakdown { color: var(--teal); }
-    .tile-fuel { color: var(--green); }
-
-    .btn-112 { background: var(--error); color: white; width: 100%; padding: 18px; border-radius: 12px; font-size: 20px; font-weight: 700; font-family: var(--font-sans); border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; text-decoration: none; box-shadow: 0 4px 12px rgba(186,26,26,0.2); }
-    
-    /* Tracker */
-    .tracker { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); border: 1px solid var(--line); }
-    .tracker-title { font-family: var(--font-serif); font-size: 24px; margin: 0 0 24px 0; color: var(--green); text-align: center; }
-    
-    .step { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 16px; font-weight: 600; color: var(--mute); }
-    .step.active { color: var(--ink); }
-    .circle { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .step.active .circle { border-color: var(--green); background: var(--green); }
-    .step.active .circle::after { content: '✓'; color: white; font-size: 14px; }
-    
-    #unanswered-text { color: var(--error); font-weight: 700; text-align: center; margin: 20px 0; font-size: 18px; }
-    
-    .btn-outline { padding: 16px; width: 100%; border-radius: 12px; border: 2px solid var(--line); background: transparent; font-family: var(--font-sans); font-size: 16px; font-weight: 700; color: var(--ink); cursor: pointer; }
-
-    /* Drive Mode */
-    .drive-mode { background: #eef2f6; border: 1px solid rgba(43,58,103,0.1); text-align: center; }
-    .drive-mode h3 { margin: 0 0 16px 0; color: var(--navy); font-size: 18px; font-family: var(--font-serif); }
-    .select-input { width: 100%; padding: 12px; border: 1px solid rgba(43,58,103,0.2); border-radius: 8px; font-size: 15px; margin-bottom: 12px; font-family: var(--font-sans); }
-    .btn-navy { background: var(--navy); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; width: 100%; cursor: pointer; }
-
-    #countdown-display { font-size: 48px; font-weight: 700; color: var(--error); margin: 20px 0; font-family: var(--font-serif); }
-    .btn-cancel { background: #fff; color: var(--ink); border: 2px solid var(--line); padding: 12px 24px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; }
-
-    /* Morse SOS */
-    #morse-view { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:black; color:white; z-index:999; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 20px; }
-  </style>
-</head>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RakshaLink · Rider app</title>
+<link rel="icon" href="/assets/emblem.svg">
+<link rel="stylesheet" href="/shared/tokens.css">
+<style>
+body.framed{padding:24px 0;display:flex;justify-content:center}
+body.framed #app{transform:translateZ(0);width:402px;height:min(840px,calc(100vh - 48px));border:10px solid var(--ink);border-radius:42px;overflow:hidden;box-shadow:0 24px 50px -20px rgba(28,42,18,.5)}
+#app{position:relative;background:var(--bg);max-width:460px;margin:0 auto;min-height:100vh;overflow:hidden}
+body.framed #app{min-height:0}
+.screen{display:none;height:100%;overflow-y:auto;padding:22px 20px 30px;flex-direction:column;gap:16px}
+.screen.on{display:flex}
+.top{display:flex;align-items:center;gap:10px}
+.top img{width:48px;height:48px;border-radius:14px}
+.brand{font:600 26px var(--serif);line-height:1.05}.tag{font-size:13px;color:var(--mute)}
+.net{margin-left:auto}
+.loc{padding:14px 16px;display:flex;gap:14px;align-items:center}
+.loc .ico{width:38px;height:38px;border-radius:50%;background:var(--tint);color:var(--green);display:grid;place-items:center;font-size:18px;flex:none}
+.loc select{font:700 14px var(--sans);color:var(--ink);background:transparent;border:0;padding:0;max-width:100%;cursor:pointer}
+.loc small{display:block;color:var(--mute);font-size:12px;overflow-wrap:anywhere}.loc>div{min-width:0;flex:1}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid>*{min-width:0}
+.tile{border:0;border-radius:24px;color:var(--cream);text-align:left;padding:16px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .12s;background-image:linear-gradient(160deg,rgba(255,255,255,.12),transparent 55%);box-shadow:0 16px 26px -18px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.16)}
+.tile:active{transform:scale(.97)}
+.tile .disc{background:var(--cream);width:46px;height:46px}
+.tile.green{background-color:var(--green)}.tile.green .disc{color:var(--green)}.tile.teal{background-color:var(--teal)}.tile.teal .disc{color:var(--teal)}.tile.navy{background-color:var(--navy)}.tile.navy .disc{color:var(--navy)}.tile.maroon{background-color:var(--maroon)}.tile.maroon .disc{color:var(--maroon)}
+.tile b{display:block;font:600 19px var(--serif)}.tile small{opacity:.88;font-size:13px}
+.dm{padding:18px}.dmh{display:flex;align-items:center;gap:12px}.dmh .disc{width:42px;height:42px;font-size:20px}.dmh .chip{margin-left:auto}.dm h3{font-size:19px;line-height:1.1}.dm p{font-size:13px;color:var(--mute);margin:2px 0 0}.dm p.how{margin:8px 0 12px}.dm .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.dm .btn{min-height:44px;padding:9px 14px;font-size:14px}.dm details{margin-top:12px}#dmRead{font:500 13px var(--sans);margin-top:12px;color:var(--ink);min-height:18px}#dmMsg{font-size:14px;margin-top:6px;font-weight:700;min-height:18px}
+details{font-size:13px;color:var(--mute)}details summary{cursor:pointer;padding:4px 0}
+details label{display:flex;gap:8px;align-items:center;margin:6px 0;color:var(--ink)}
+.note{font-size:11.5px;color:var(--mute);text-align:center}
+#toast{position:fixed;left:16px;right:16px;bottom:18px;background:var(--ink);color:var(--cream);padding:12px 14px;border-radius:12px;font-size:14px;z-index:20}
+.back{background:none;border:0;color:var(--mute);font:500 14px var(--sans);cursor:pointer;text-align:left;padding:0;display:flex;gap:6px;align-items:center}
+.over{position:fixed;inset:0;z-index:10;display:none;flex-direction:column;gap:14px;padding:22px 20px;overflow-y:auto}
+.over.on{display:flex}
+#countdown{background:linear-gradient(170deg,#5B1F2D,#2a0d15);color:var(--cream)}
+#countdown .ring{position:relative;display:grid;place-items:center;height:220px}
+#countdown .ring b{position:absolute;font:600 64px var(--serif)}
+#offline{background:#120c0d;color:var(--cream);transition:background .05s}
+#offline.lit{background:#fff;color:#111}
+#offline .card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);padding:14px;font-size:14px}
+#offline.lit .card{background:#f1f1f1;border-color:#ddd}
+#mstrip{display:flex;gap:8px;align-items:center;justify-content:center;height:20px}#mstrip i{height:12px;border-radius:6px;background:#4a3f42;display:block}#mstrip i.d{width:12px}#mstrip i.l{width:36px}#mstrip i.a{background:#ffd27a;box-shadow:0 0 10px #ffd27a}
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:12px;align-items:center;color:var(--mute)}
+.steps li::before{content:"";width:22px;height:22px;border-radius:50%;border:2px solid rgba(94,107,87,.5);background:var(--surface);flex:none}
+.steps li.done{color:var(--ink);font-weight:700}.steps li.done::before{background:var(--green);border-color:var(--green);box-shadow:inset 0 0 0 4px var(--green),inset 0 0 0 5px var(--green)}
+.steps li.done::before{background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5F3EA' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/16px no-repeat;box-shadow:none}
+.rc{padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.rc small{color:var(--mute);display:block}
+.sample{font:700 10px var(--sans);letter-spacing:.08em;border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--mute)}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(186,26,26,.25)}}
+</style></head>
 <body>
-  <div class="container">
-    <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
-    
-    <header>
-      <div class="logo-icon">RL</div>
-      <div>
-        <h1 class="title">RakshaLink</h1>
-        <div class="subtitle">Help, when you need it most.</div>
-      </div>
-    </header>
+<div id="app">
+ <section id="home" class="screen on">
+  <div class="top"><img src="/assets/emblem.svg" alt="">
+   <div><div class="brand">RakshaLink</div><div class="tag">Help, when you need it most.</div></div>
+   <span class="chip green net" id="net"><span class="dot"></span>Online</span></div>
+  <div class="demo">DEMO · SIMULATED DISPATCH · SAMPLE RESPONDERS</div>
+  <div class="card loc"><span class="ico" id="locIco"></span>
+   <div><select id="preset" aria-label="Demo location"></select><small id="coords"></small></div></div>
+  <div class="grid" id="tiles"></div>
+  <a class="btn red block" href="tel:112" id="call112" style="flex-direction:column;gap:0;padding:14px;border-radius:18px"><span style="font-size:20px">CALL 112</span><small style="font-weight:500;font-size:13px">Emergency Helpline</small></a>
+  <div class="card dm"><div class="dmh"><span class="disc navy" id="dmIco"></span><div><h3>Drive Mode</h3><p>Raises an Accident alert after a detected crash</p></div><span class="chip" id="dmState">Off</span></div>
+   <div class="row"><button class="btn primary" data-trace="crash">Simulate crash</button><button class="btn white" data-trace="speed_breaker">Speed breaker</button></div>
+   <details><summary>More tests and how it works</summary><p class="how">A crash alert needs driving speed, a hard impact and a sudden stop. A bump never triggers it. Prototype heuristic, not validated on real crashes. These tests replay prepared traces.</p><div class="row"><button class="btn white" data-trace="hard_brake">Hard braking</button><button class="btn white" data-trace="pothole">Pothole</button><button class="btn white" data-trace="stationary_drop">Phone drop (parked)</button></div></details>
+   <div id="dmRead"></div><div id="dmMsg"></div></div>
+  <details id="tools"><summary>Demo tools: offline test and SMS</summary>
+   <label><input type="checkbox" id="fo"> Pretend there is no signal (same as airplane mode)</label>
+   <button class="btn white" id="smsDemo" style="min-height:40px;font-size:13px">Simulate SMS fallback delivery</button></details>
+  <p class="note">Demo mode: the location is a preset because GPS is unreliable indoors, and alerts go to a simulated responder network. In a real emergency call 112.</p>
+ </section>
 
-    <div id="home-view" style="display:flex; flex-direction:column; gap:20px; width:100%;">
-      
-      <div class="card">
-        <div class="loc-title">Current Location</div>
-        <div class="loc-val" id="loc-text">GNIT Campus, Sodepur (demo) (22.6951, 88.3788)</div>
-      </div>
+ <section id="status" class="screen">
+  <button class="back" id="back"></button>
+  <div><div id="stCat" style="font:700 12px var(--sans);letter-spacing:.12em"></div><h1 id="stH" style="font-size:28px;line-height:1.15;margin-top:4px"></h1><p id="stSub" class="muted" style="margin-top:4px"></p></div>
+  <div id="stBadges" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+  <ul class="steps card" style="padding:16px" id="steps"></ul>
+  <div id="resps" style="display:flex;flex-direction:column;gap:10px"></div>
+  <div id="stActs" style="display:flex;flex-direction:column;gap:10px"></div>
+  <a class="btn red block" href="tel:112">Call 112</a>
+ </section>
 
-      <div class="grid">
-        <button class="tile tile-medical" onclick="sendSOS('medical')">
-          <div class="tile-icon">✚</div>
-          <div class="tile-label">Medical</div>
-        </button>
-        <button class="tile tile-accident" onclick="sendSOS('accident')">
-          <div class="tile-icon">🚗</div>
-          <div class="tile-label">Accident</div>
-        </button>
-        <button class="tile tile-breakdown" onclick="sendSOS('breakdown')">
-          <div class="tile-icon">🔧</div>
-          <div class="tile-label">Breakdown</div>
-        </button>
-        <button class="tile tile-fuel" onclick="sendSOS('fuel')">
-          <div class="tile-icon">⛽</div>
-          <div class="tile-label">Fuel</div>
-        </button>
-      </div>
+ <section id="countdown" class="over" role="alertdialog" aria-live="assertive">
+  <button class="back" id="cdX" style="display:none"></button>
+  <div><div style="font:700 12px var(--sans);letter-spacing:.14em;color:#f0b4bd">CRASH DETECTED</div><h1 style="font-size:34px;margin-top:4px">Are you OK?</h1></div>
+  <div class="ring"><svg viewBox="0 0 120 120" width="210" height="210"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="8"/><circle id="ringC" cx="60" cy="60" r="52" fill="none" stroke="#F5F3EA" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="0" transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 1s linear"/></svg><b id="cdN">20</b></div>
+  <p style="text-align:center;color:#f0cfd4">We felt a hard impact and a sudden stop. An Accident alert is sent automatically when the timer reaches zero.</p>
+  <div style="margin-top:auto;display:flex;flex-direction:column;gap:10px"><button class="btn cream block" id="cdOk" style="font-size:20px;padding:18px">I'M OK</button><button class="btn block" id="cdNow" style="border:1.5px solid rgba(255,255,255,.4);background:transparent;color:var(--cream)">Send help now</button></div>
+  <p class="note" style="color:#c9a6ad">Impact and speed values come from the prepared test trace (sample).</p>
+ </section>
 
-      <div class="card drive-mode">
-        <h3>Drive Mode</h3>
-        <select id="trace-select" class="select-input">
-          <option value="crash">Trace: Real Crash (8.4g, 60km/h)</option>
-          <option value="speed_breaker">Trace: Speed Breaker</option>
-          <option value="pothole">Trace: Pothole</option>
-          <option value="hard_brake">Trace: Hard Brake</option>
-          <option value="phone_drop_stationary">Trace: Phone Drop</option>
-        </select>
-        <button class="btn-navy" onclick="runTrace()">Simulate sensor trace</button>
-        
-        <div id="countdown-display" style="display:none;">
-          <div id="countdown-val">20</div>
-          <button class="btn-cancel" onclick="cancelCrash()">I'm OK (Cancel)</button>
-        </div>
-      </div>
+ <section id="offline" class="over">
+  <div><div style="font:700 12px var(--sans);letter-spacing:.14em;color:#d9b25c">NO SIGNAL</div><h1 style="font-size:30px;margin-top:4px">Signalling for help</h1></div>
+  <div id="mstrip"></div>
+  <div class="card"><b class="serif" style="font-size:16px">Alert saved on this phone</b><p style="margin-top:6px;opacity:.85">It is sent automatically when signal returns. The flash and beep are a Morse SOS for people nearby. Morse does not send data.</p><p id="qInfo" style="margin-top:8px;font-weight:700"></p></div>
+  <a class="btn block" id="smsBtn" style="background:#d9b25c;color:#1a1204">Send by SMS instead</a>
+  <button class="btn block" id="fo2" hidden style="background:#d9b25c;color:#1a1204">Turn signal back on (demo)</button>
+  <button class="btn block" id="retryBtn" style="background:transparent;border:1.5px solid rgba(128,128,128,.5);color:inherit">Retry now</button>
+  <button class="btn block" id="qCancel" style="background:transparent;color:inherit;text-decoration:underline;min-height:36px">Cancel this alert</button>
+  <p class="note" style="color:inherit;opacity:.7">The SMS opens your messages with a compact text. You tap Send.</p>
+ </section>
+ <div id="toast" hidden></div>
+</div>
+<script src="/shared/common.js"></script>
+<script src="/shared/detector.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id), RL = window.RL, DET = window.RLDetector;
+if (window.self === window.top && innerWidth >= 600) document.body.classList.add('framed');
+let cfg = { countdown_s: 20, presets: [{ id: 'campus', name: 'GNIT campus, Sodepur (demo)', lat: 22.6951, lng: 88.3788 }, { id: 'nh19', name: 'NH-19 sample point (demo)', lat: 23.2542, lng: 87.8731 }] };
+let preset = null, forceOffline = false, cur = null, pollT = null, flushT = null, cdT = null, cdLeft = 0, cdInfo = null, traceT = null, busy = false, lastNote = null;
+const SMSC = { medical: 'M', accident: 'A', breakdown: 'B', fuel: 'F' };
+const online = () => navigator.onLine && !forceOffline;
 
-      <a href="tel:112" class="btn-112">Call 112</a>
-    </div>
+function toast(m) { const t = $('toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 4000); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id)); }
+function net() { const o = online(), n = $('net'); n.className = 'chip net ' + (o ? 'green' : 'err'); n.innerHTML = '<span class="dot" style="background:' + (o ? '#3E8A4E' : '#BA1A1A') + '"></span>' + (o ? 'Online' : 'Offline'); }
 
-    <div id="tracker-view" style="display:none; width:100%;">
-      <div class="tracker">
-        <h2 class="tracker-title" id="tracker-status">Finding help...</h2>
-        
-        <div class="step active"><div class="circle"></div> Request Sent <span id="queue-tag" style="display:none;font-size:10px;background:var(--amber);color:#000;padding:2px 6px;border-radius:4px;margin-left:8px;font-weight:700;">Queued</span></div>
-        <div class="step" id="st-notified"><div class="circle"></div> Responders Notified</div>
-        <div class="step" id="st-accepted"><div class="circle"></div> Help Accepted</div>
-        <div class="step" id="st-enroute"><div class="circle"></div> On the way <span id="eta-text" style="color:var(--mute);font-size:13px;margin-left:8px;"></span></div>
-        <div class="step" id="st-arrived"><div class="circle"></div> Arrived</div>
-        <div class="step" id="st-resolved"><div class="circle"></div> Resolved</div>
-        
-        <div id="unanswered-text" style="display:none;">
-          No responder answered.<br><br>
-          <a href="tel:112" class="btn-112" style="font-size:16px; padding:12px;">Call 112 Now</a>
-        </div>
-        
-        <button class="btn-outline" onclick="resetApp()" style="margin-top:24px;">Back to Home</button>
-      </div>
-    </div>
-    
-    <div id="morse-view">
-      <h1 style="color:var(--error); font-size:64px; font-family:var(--font-serif); margin:0;">SOS</h1>
-      <p style="font-size:20px; font-weight:700;">Offline Mode Active</p>
-      <p style="color:#aaa;">Flashing Morse Code. Retrying connection...</p>
-      <button onclick="stopMorse()" style="padding:16px 32px; background:white; color:black; border:none; border-radius:12px; margin-top:32px; font-weight:700; font-size:18px;">Stop</button>
-    </div>
-  </div>
+/* ---------- home ---------- */
+function buildHome() {
+  $('locIco').innerHTML = RL.ic('pin');
+  $('dmIco').innerHTML = RL.ic('car');
+  $('back').innerHTML = RL.ic('arrow') + ' Home';
+  $('tiles').innerHTML = Object.keys(RL.CAT).map(k => { const c = RL.CAT[k]; return `<button class="tile ${c.color}" data-cat="${k}"><span class="disc">${RL.ic(c.icon)}</span><span><b>${c.label}</b><small>${c.hint}</small></span></button>`; }).join('');
+  $('preset').innerHTML = cfg.presets.map(p => `<option value="${p.id}">${RL.esc(p.name)}</option>`).join('');
+  const saved = RL.store.get('rl_preset', cfg.presets[0].id);
+  preset = cfg.presets.find(p => p.id === saved) || cfg.presets[0]; $('preset').value = preset.id; coords();
+}
+function coords() { $('coords').textContent = preset.lat.toFixed(4) + '° N, ' + preset.lng.toFixed(4) + '° E'; }
 
-  <script src="./crash.js"></script>
-  <script>
-    const PRESETS = {
-      campus: { name: 'GNIT Campus, Sodepur (demo)', lat: 22.6951, lng: 88.3788 }
-    };
-    let currentPreset = 'campus';
-    let currentEventId = null;
-    let pollInterval = null;
-    let morseInterval = null;
+/* ---------- sending ---------- */
+async function sendSOS(category, trigger, extra) {
+  RL.unlockAudio();
+  const payload = Object.assign({ category, trigger, lat: preset.lat, lng: preset.lng, client_id: RL.uid(), client_ts: new Date().toISOString() }, extra || {});
+  if (!online()) return goOffline(payload);
+  try {
+    const r = await RL.api('/api/sos', { method: 'POST', body: payload, timeout: 4000 });
+    openStatus(r.id, null);
+  } catch (e) {
+    if (e.status && e.status < 500 && e.status !== 429) return toast('Could not send: ' + e.message);
+    goOffline(payload);
+  }
+}
+const queue = () => RL.store.get('rl_queue', []);
+const saveQ = q => RL.store.set('rl_queue', q);
 
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function beep(duration, freq, vol) {
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-      const oscillator = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      oscillator.connect(gain);
-      gain.connect(audioCtx.destination);
-      oscillator.type = 'sine';
-      oscillator.frequency.value = freq;
-      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-      oscillator.start(audioCtx.currentTime);
-      oscillator.stop(audioCtx.currentTime + duration / 1000);
-    }
+/* ---------- offline: save, Morse SOS (screen flash + beep), retry ---------- */
+const MORSE = { S: '...', O: '---' };
+function morseLoop(u) {
+  const t = []; 'SOS'.split('').forEach((ch, ci, a) => { const c = MORSE[ch]; c.split('').forEach((s, si) => { t.push({ on: true, dur: (s === '.' ? 1 : 3) * u, s }); if (si < c.length - 1) t.push({ on: false, dur: u }); }); if (ci < a.length - 1) t.push({ on: false, dur: 3 * u }); });
+  t.push({ on: false, dur: 7 * u }); return t;
+}
+const LOOP = morseLoop(300); let mi = 0, mT = null, symOf = []; { let k = 0; LOOP.forEach((e, i) => { symOf[i] = e.on ? k++ : -1; }); }
+$('mstrip').innerHTML = LOOP.filter(e => e.on).map(e => `<i class="${e.s === '.' ? 'd' : 'l'}"></i>`).join('');
+function morseStart() {
+  if (mT) return; mi = 0;
+  const step = () => {
+    const e = LOOP[mi]; $('offline').classList.toggle('lit', e.on); RL.tone(e.on, 880);
+    [...$('mstrip').children].forEach((c, i) => c.classList.toggle('a', e.on && i === symOf[mi]));
+    mT = setTimeout(() => { mi = (mi + 1) % LOOP.length; step(); }, e.dur);
+  }; step();
+}
+function morseStop() { clearTimeout(mT); mT = null; RL.tone(false); $('offline').classList.remove('lit'); }
+function smsHref(item) {
+  const c = SMSC[item.category] + '|' + item.lat + ',' + item.lng + '|' + Math.floor(new Date(item.client_ts).getTime() / 1000) + (item.trigger === 'crash_auto' ? '|C' : '');
+  return 'sms:?body=' + encodeURIComponent('RL1|' + c);
+}
+function goOffline(payload) {
+  const q = queue(); q.push(payload); saveQ(q); showOffline();
+}
+function showOffline() {
+  const q = queue(); if (!q.length) return;
+  $('fo2').hidden = !forceOffline; $('offline').classList.add('on'); $('qInfo').textContent = q.length + (q.length === 1 ? ' alert' : ' alerts') + ' waiting to send. Retrying every 3 seconds.';
+  $('smsBtn').setAttribute('href', smsHref(q[0]));
+  morseStart(); if (!flushT) flushT = setInterval(flush, 3000);
+}
+async function flush() {
+  const q = queue(); if (!q.length || !online()) return;
+  const item = q[0];
+  try {
+    const r = await RL.api('/api/sos', { method: 'POST', body: Object.assign({}, item, { queued: true }), timeout: 4000 });
+    q.shift(); saveQ(q);
+    if (!q.length) { clearInterval(flushT); flushT = null; morseStop(); $('offline').classList.remove('on'); }
+    openStatus(r.id, item.client_ts); toast('Delivered from the saved queue.');
+  } catch (e) {
+    if (e.status && e.status < 500 && e.status !== 429) { q.shift(); saveQ(q); if (!q.length) { morseStop(); $('offline').classList.remove('on'); } toast('Dropped an invalid saved alert.'); }
+  }
+}
+$('retryBtn').onclick = () => { RL.unlockAudio(); flush(); };
+$('qCancel').onclick = () => { saveQ([]); clearInterval(flushT); flushT = null; morseStop(); $('offline').classList.remove('on'); toast('Saved alert cancelled. Nothing was sent.'); };
 
-    function setPreset(p) {
-      currentPreset = p;
-      document.getElementById('btn-campus').className = `preset-btn ${p==='campus'?'active':''}`;
-      document.getElementById('btn-nh19').className = `preset-btn ${p==='nh19'?'active':''}`;
-      document.getElementById('loc-text').textContent = `${PRESETS[p].name} (${PRESETS[p].lat}, ${PRESETS[p].lng})`;
-    }
+/* ---------- status (real steps only) ---------- */
+function openStatus(id, queuedAt) { cur = { id }; lastNote = queuedAt; show('status'); poll(); clearInterval(pollT); pollT = setInterval(poll, 2000); }
+async function poll() {
+  if (!cur) return;
+  try { render(await RL.api('/api/sos/' + cur.id, { timeout: 5000 })); }
+  catch (e) { if (e.status === 404) { clearInterval(pollT); $('stH').textContent = 'This alert is no longer available'; $('stSub').textContent = 'The demo was reset.'; } }
+}
+function render(v) {
+  const c = RL.CAT[v.category], s = v.steps;
+  $('stCat').textContent = c.label.toUpperCase(); $('stCat').style.color = RL.COL[c.color];
+  let h, sub;
+  if (s.unanswered) { h = 'No responder answered'; sub = 'Please call 112 now.'; }
+  else if (s.resolved) { h = 'Resolved'; sub = 'The responder marked this alert resolved.'; }
+  else if (s.arrived) { h = 'Responder has arrived'; sub = 'A responder marked that they are on scene.'; }
+  else if (s.enroute) { h = 'Responder is on the way'; sub = v.responder_eta_minutes ? "Responder's estimate: " + v.responder_eta_minutes + ' min (typed by the responder)' : 'No estimate given yet.'; }
+  else if (s.accepted) { h = 'Responder accepted'; sub = 'They have not marked "on the way" yet.'; }
+  else { h = 'Waiting for a responder'; sub = 'Alert sent. We are contacting the nearest responder.'; }
+  $('stH').textContent = h; $('stSub').textContent = sub;
+  $('stBadges').innerHTML = (v.trigger === 'crash_auto' ? '<span class="chip navy">Automatic crash alert</span>' : '<span class="chip">Manual alert</span>') + (v.delivered_from_queue ? '<span class="chip amber">Delivered from queue</span>' : '');
+  $('steps').innerHTML = [['sent', 'Alert sent'], ['notified', 'Responder notified'], ['accepted', 'Responder accepted'], ['enroute', 'On the way'], ['arrived', 'Arrived'], ['resolved', 'Resolved']].map(x => `<li class="${s[x[0]] ? 'done' : ''}">${x[1]}</li>`).join('');
+  const st = { pending: 'Notified', accepted: 'Accepted', missed: 'No response, escalated', declined: 'Declined' };
+  $('resps').innerHTML = v.responders.map(r => `<div class="card rc"><div><span class="chip ${r.status === 'accepted' ? 'green' : r.status === 'pending' ? '' : 'err'}">${RL.esc(st[r.status] || r.status)}</span><b class="serif" style="display:block;margin-top:6px">${RL.esc(r.name)}</b><small>${RL.esc(RL.TYPE[r.type])} · ${RL.km(r.distance_m)} straight-line</small></div><span class="sample">SAMPLE</span></div>`).join('');
+  $('stActs').innerHTML = s.unanswered ? '<button class="btn primary block" id="again">Try again</button>' : '';
+  if (s.unanswered) { $('again').onclick = () => { clearInterval(pollT); show('home'); sendSOS(v.category, v.trigger); }; }
+  if (s.resolved || s.unanswered) clearInterval(pollT);
+}
+$('back').onclick = () => { clearInterval(pollT); cur = null; show('home'); };
 
-    async function sendSOS(category, trigger = 'manual', extraData = {}) {
-      const payload = { 
-        category, trigger, lat: PRESETS[currentPreset].lat, lng: PRESETS[currentPreset].lng,
-        client_id: Math.random().toString(36).substring(7), ...extraData
-      };
-      
-      document.getElementById('home-view').style.display = 'none';
-      
-      try {
-        const res = await fetch('/api/sos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        if (!res.ok) throw new Error('Offline');
-        const data = await res.json();
-        currentEventId = data.id;
-        document.getElementById('tracker-view').style.display = 'block';
-        if (extraData._queued) document.getElementById('queue-tag').style.display = 'inline';
-        
-        if (pollInterval) clearInterval(pollInterval);
-        pollInterval = setInterval(pollTracker, 2000);
-        pollTracker();
-      } catch (err) {
-        localStorage.setItem('sos_queue', JSON.stringify(payload));
-        startMorseSOS();
-      }
-    }
+/* ---------- crash countdown ---------- */
+function startCountdown(info) {
+  cdInfo = info; cdLeft = cfg.countdown_s; $('countdown').classList.add('on'); drawCd(true); RL.unlockAudio();
+  clearInterval(cdT); cdT = setInterval(() => { cdLeft--; if (cdLeft <= 0) { clearInterval(cdT); return fireCrash(); } drawCd(); }, 1000);
+}
+function drawCd(first) {
+  $('cdN').textContent = cdLeft; $('ringC').style.strokeDashoffset = 327 * (1 - cdLeft / cfg.countdown_s);
+  RL.beep(cdLeft % 2 ? 1000 : 740, 220); try { navigator.vibrate && navigator.vibrate(first ? [300, 120, 300] : 200); } catch (e) { }
+}
+function endCd() { clearInterval(cdT); $('countdown').classList.remove('on'); RL.tone(false); try { navigator.vibrate && navigator.vibrate(0); } catch (e) { } }
+function fireCrash() { endCd(); $('dmState').textContent = 'SOS SENT'; sendSOS('accident', 'crash_auto', { peak_g: cdInfo.peak_g, pre_impact_kmh: cdInfo.pre_impact_kmh }); }
+$('cdOk').onclick = () => { endCd(); $('dmState').textContent = 'Cancelled'; $('dmMsg').textContent = 'Cancelled by the rider. Nothing was sent.'; $('dmMsg').style.color = 'var(--green)'; };
+$('cdNow').onclick = () => fireCrash();
 
-    function startMorseSOS() {
-      document.getElementById('morse-view').style.display = 'flex';
-      let state = 0;
-      morseInterval = setInterval(() => {
-        const isFlash = state % 2 === 0;
-        document.getElementById('morse-view').style.backgroundColor = isFlash ? 'white' : 'black';
-        document.getElementById('morse-view').style.color = isFlash ? 'black' : 'white';
-        if (isFlash) beep(100, 800, 1);
-        state++;
-        
-        if (state % 15 === 0) {
-          const q = localStorage.getItem('sos_queue');
-          if (q) {
-            fetch('/api/health').then(r => {
-              if (r.ok) {
-                stopMorse();
-                const payload = JSON.parse(q);
-                payload._queued = true;
-                localStorage.removeItem('sos_queue');
-                sendSOS(payload.category, payload.trigger, payload);
-              }
-            }).catch(()=>{});
-          }
-        }
-      }, 200);
-    }
-    function stopMorse() {
-      clearInterval(morseInterval);
-      document.getElementById('morse-view').style.display = 'none';
-      document.getElementById('home-view').style.display = 'flex';
-    }
+/* ---------- Drive Mode: replay a prepared trace through the real detector ---------- */
+const NOTE = {
+  discarded: ['Speed breaker ignored: there was a spike, but the car did not stop, so no alert.', 'green'],
+  below_threshold: ['Pothole ignored: the bump was below the impact threshold.', 'green'],
+  hard_brake_ignored: ['Hard braking ignored: speed dropped but there was no impact.', 'green'],
+  ignored_not_driving: ['Drop ignored: the phone was not in a moving vehicle.', 'green']
+};
+function runTrace(name) {
+  if (busy) return; busy = true; RL.unlockAudio();
+  const d = DET.createDetector(), tr = DET.TRACES[name]; let i = 0, note = null;
+  $('dmMsg').textContent = ''; $('dmState').textContent = 'Starting'; document.querySelectorAll('[data-trace]').forEach(b => { b.disabled = true; });
+  const done = () => { clearInterval(traceT); busy = false; document.querySelectorAll('[data-trace]').forEach(b => { b.disabled = false; });
+    if (!note && d.state() !== 'countdown') { $('dmMsg').textContent = 'Trace finished. No alert.'; $('dmState').textContent = 'Idle'; } };
+  traceT = setInterval(() => {
+    const s = tr[i++]; if (!s) return done();
+    $('dmRead').textContent = 'speed ' + Math.round(s.kmh) + ' km/h · ' + s.g.toFixed(1) + ' g (simulated trace, 2× speed)';
+    d.push(s).forEach(e => {
+      if (e.type === 'armed') $('dmState').textContent = 'ARMED';
+      else if (e.type === 'impact') $('dmState').textContent = 'IMPACT → VERIFYING';
+      else if (e.type === 'countdown') { $('dmState').textContent = 'COUNTDOWN'; clearInterval(traceT); busy = false; document.querySelectorAll('[data-trace]').forEach(b => { b.disabled = false; }); startCountdown(e); }
+      else if (NOTE[e.type]) { note = NOTE[e.type]; $('dmMsg').textContent = note[0]; $('dmMsg').style.color = 'var(--green)'; $('dmState').textContent = 'ARMED'; }
+    });
+  }, 50);
+}
 
-    async function pollTracker() {
-      if (!currentEventId) return;
-      try {
-        const res = await fetch(`/api/sos/${currentEventId}`);
-        if (!res.ok) return;
-        const ev = await res.json();
-        
-        document.getElementById('st-notified').className = `step ${ev.steps.notified ? 'active' : ''}`;
-        document.getElementById('st-accepted').className = `step ${ev.steps.accepted ? 'active' : ''}`;
-        document.getElementById('st-enroute').className = `step ${ev.steps.enroute ? 'active' : ''}`;
-        document.getElementById('st-arrived').className = `step ${ev.steps.arrived ? 'active' : ''}`;
-        document.getElementById('st-resolved').className = `step ${ev.steps.resolved ? 'active' : ''}`;
-        
-        if (ev.responder_eta_minutes) {
-          document.getElementById('eta-text').textContent = `(Estimate: ${ev.responder_eta_minutes}m)`;
-        }
-
-        if (ev.steps.unanswered) {
-          document.getElementById('tracker-status').textContent = 'Escalation Failed';
-          document.getElementById('tracker-status').style.color = 'var(--error)';
-          document.getElementById('unanswered-text').style.display = 'block';
-          clearInterval(pollInterval);
-        } else if (ev.steps.resolved) {
-          document.getElementById('tracker-status').textContent = 'Resolved';
-          clearInterval(pollInterval);
-        } else if (ev.steps.accepted) {
-          document.getElementById('tracker-status').textContent = 'Help is arranged';
-        }
-      } catch(e) {}
-    }
-
-    let countdownTimer;
-    function runTrace() {
-      const traceId = document.getElementById('trace-select').value;
-      const result = detectCrash(PREPARED_TRACES[traceId]);
-      if (result) {
-        document.getElementById('countdown-display').style.display = 'block';
-        let count = 20;
-        document.getElementById('countdown-val').textContent = count;
-        
-        countdownTimer = setInterval(() => {
-          count--;
-          document.getElementById('countdown-val').textContent = count;
-          beep(150, 1000, 1);
-          if (count <= 0) {
-            clearInterval(countdownTimer);
-            document.getElementById('countdown-display').style.display = 'none';
-            sendSOS('accident', 'crash_auto', result);
-          }
-        }, 1000);
-      } else {
-        alert("Trace executed: Normal driving (No crash detected).");
-      }
-    }
-    function cancelCrash() {
-      clearInterval(countdownTimer);
-      document.getElementById('countdown-display').style.display = 'none';
-    }
-
-    function resetApp() {
-      currentEventId = null;
-      if (pollInterval) clearInterval(pollInterval);
-      document.getElementById('home-view').style.display = 'flex';
-      document.getElementById('tracker-view').style.display = 'none';
-      document.getElementById('unanswered-text').style.display = 'none';
-      document.getElementById('queue-tag').style.display = 'none';
-      ['notified','accepted','enroute','arrived','resolved'].forEach(s => document.getElementById(`st-${s}`).className = 'step');
-      document.getElementById('tracker-status').textContent = 'Finding help...';
-      document.getElementById('tracker-status').style.color = 'var(--green)';
-      document.getElementById('eta-text').textContent = '';
-    }
-  </script>
-</body>
-</html>
+/* ---------- wiring ---------- */
+$('tiles').addEventListener('click', e => { const b = e.target.closest('[data-cat]'); if (b) sendSOS(b.dataset.cat, 'manual'); });
+document.querySelectorAll('[data-trace]').forEach(b => { b.onclick = () => runTrace(b.dataset.trace); });
+$('preset').onchange = e => { preset = cfg.presets.find(p => p.id === e.target.value); RL.store.set('rl_preset', preset.id); coords(); };
+function setFO(v) { forceOffline = v; $('fo').checked = v; net(); $('fo2').hidden = !v; if (v) showOffline(); else flush(); }
+$('fo').onchange = e => setFO(e.target.checked);
+$('fo2').onclick = () => setFO(false);
+$('smsDemo').onclick = async () => {
+  const q = { category: 'accident', trigger: 'crash_auto', lat: preset.lat, lng: preset.lng, client_ts: new Date().toISOString() };
+  if (!online()) return toast('This demo needs a connection. A real SMS goes through the phone network.');
+  try { const r = await RL.api('/api/sms/inbound', { method: 'POST', body: { body: decodeURIComponent(smsHref(q).slice(10)) } }); toast('SMS payload accepted by the server (demo gateway).'); openStatus(r.id, null); } catch (e) { toast('SMS demo failed: ' + e.message); }
+};
+addEventListener('online', () => { net(); flush(); }); addEventListener('offline', () => { net(); if (queue().length) showOffline(); });
+(async function init() {
+  try { cfg = Object.assign(cfg, await RL.api('/api/config', { timeout: 3000 })); } catch (e) { }
+  buildHome(); net(); if (queue().length) { showOffline(); flush(); }
+})();
+window.__rider = { runTrace, sendSOS, flush, queue, cur: () => cur };
+})();
+</script></body></html>

@@ -1,62 +1,47 @@
 # Architecture
 
+One Express server serves the API and every page. State is in memory, so there is no database to set up.
+
 ```text
-Rider app (mobile web page)  ->  API (Express)  ->  Triage  ->  Match (PostGIS)  ->  Dispatch (SMS/voice)  ->  Responder
-                                                                                   |
-                                  Responder Console (web) <-- live updates (SSE) ---+
+/rider (phone)  -->  POST /api/sos  -->  triage  -->  nearest responders  -->  simulated dispatch (accept links)
+                                                                   |
+/console (laptop) <-- Server-Sent Events + 3 s polling ------------+     /r/<token> (phone) accepts the same alert
 ```
 
-## Triage (deterministic, unit-tested)
+## Files
+| File | Role |
+|---|---|
+| `server/triage.js` | The category to responder-type table and the role views |
+| `server/store.js` | In-memory store, haversine nearest search, hashed expiring tokens |
+| `server/core.js` | Events, dispatch, accept and steps, escalation, metrics. Takes an injectable clock so tests need no waiting |
+| `server/index.js` | Express routes, validation, rate limit, SSE, static pages |
+| `web/shared/detector.js` | Drive Mode crash detector, a pure state machine used by the browser and by tests |
+| `web/rider`, `web/console`, `web/accept` | The three interfaces. `web/simulation/index.html` is the 3D simulation |
+| `web/vendor` | Leaflet and the fonts, bundled so the app does not depend on a CDN. Only map tiles and Three.js (for the simulation) need internet |
 
-| Emergency | Dispatched to |
+## Triage
+| Emergency | Notified |
 |---|---|
 | medical | nearest hospital |
-| accident | nearest hospital **and** nearest police |
+| accident | nearest hospital and nearest police |
 | breakdown | nearest mechanic |
 | fuel | nearest fuel pump |
 
-The mapping lives in one file. If a voice transcript is classified by a model, the output must be one of these four values or it is discarded and the user is asked to confirm.
+Each type is tracked on its own: an accident can be accepted by the hospital while the police alert escalates separately.
 
-## Data model (core tables)
+## Responder steps
+Per dispatch: `pending`, then `accepted`, `enroute`, `arrived`, `resolved`, strictly in order, each set only by that responder (through the console or the token link). Other outcomes are `declined` and `missed` (no response in time). The rider view takes the furthest step reached. An estimate is stored only if the responder typed it (1 to 180 minutes). The system never computes an ETA.
 
-```sql
-responders(id, name, type, phone, geom GEOGRAPHY(Point,4326), source, osm_id, is_demo)
-sos_events(id, category, trigger, channel, geom, status, created_at, peak_g, pre_impact_kmh, accepted_by)
-dispatch_log(id, sos_id, responder_id, method, ok, token_hash, accepted_at, declined_at, escalation_level, at)
-```
+## Escalation
+A 1-second worker checks every open alert. If the latest dispatch of a type is still `pending` after `ESCALATE_AFTER_S`, it becomes `missed` and the next-nearest on-duty responder of that type is contacted. Maximum three per type. If nobody has accepted and nobody is pending, the alert becomes `unanswered` and the rider is told to call 112. Declining escalates immediately.
 
-Nearest match: `ORDER BY geom <-> point LIMIT 3` filtered by the needed responder types. If PostGIS is unavailable, an in-memory haversine search returns the same results.
-
-## API
-
-| Endpoint | Purpose |
-|---|---|
-| `POST /api/sos` | Create an alert from the app (category, location, trigger) |
-| `GET /api/sos/:id` | Real status flags: sent, notified, accepted, unanswered |
-| `GET /api/stream` | Server-Sent Events for the Responder Console |
-| `GET /r/:token`, `POST /r/:token/accept` or `decline` | Mobile accept page opened from the SMS link |
-| `POST /api/sms/inbound` | Compact SMS fallback payload, same pipeline |
-| `GET /api/metrics` | Median time-to-dispatch with sample size |
-
-## Dispatch and escalation
-
-Dispatch sits behind a `PROVIDER` switch: `mock` records what would be sent and labels it **SIMULATED DISPATCH**; `twilio` sends to whitelisted demo numbers. Accept links use random tokens, stored only as hashes, and expire. If no responder accepts within `ESCALATE_AFTER_S`, the next-nearest responder of the needed type is contacted. After three attempts per type, the alert becomes `unanswered` and the rider is told to call 112.
-
-## Drive Mode (crash detection)
-
-A pure state machine: `Idle -> Armed -> Verifying -> Countdown -> SOS`. It arms on sustained driving speed, reacts to an impact spike, and requires a sharp speed drop or stillness within a few seconds. A spike where speed continues is discarded. Thresholds live in one config file and are starting values, not validated on real crashes. Motion data never leaves the phone; only a summary is sent when an alert fires. Tested with synthetic traces: crash, speed breaker, pothole, stationary drop, hard braking.
+## Drive Mode detector
+`idle` to `armed` (20 km/h held for 3 s), to `verifying` (a spike of at least 4 g), to `countdown` (speed at or below 5 km/h within 3 s) to an automatic alert. A spike where speed continues is discarded. Hard braking without an impact, a spike below the threshold, and a spike while parked are ignored. Thresholds are starting values, not validated on real crashes.
 
 ## Offline ladder
-
-1. Data available: call the API.
-2. No data but SMS works: open a prefilled SMS with a compact payload; the gateway runs the same triage.
-3. No signal: Morse SOS (torch and speaker) for people nearby, and the alert is queued until signal returns. Morse does not reach a responder by itself, and the SMS fallback needs a tap on Send.
+1. Online: `POST /api/sos`.
+2. No signal: the alert is stored in the phone's local storage, a Morse SOS flashes the screen with a beep, and a prefilled SMS (`RL1|A|lat,lng|unix_time|C`) is offered. `POST /api/sms/inbound` parses that payload.
+3. Signal returns: the saved alert is sent with `queued: true`, creating a "Delivered from queue" event. Alerts are idempotent by `client_id`, so a retry never creates a duplicate.
 
 ## Security basics
-
-Hashed accept tokens, rate limiting on `POST /api/sos`, strict input validation, no secrets in the repo, a demo-only reset endpoint that is disabled outside demo mode.
-
-## Responder workflow
-
-Responders have an **on duty** switch (off-duty responders are never matched or contacted) and move an alert through `accepted`, `enroute`, `arrived`, `resolved`. Each step is set only by the responder through the same tokenised link used for accepting. The rider sees only real steps. An ETA appears only if the responder typed it, labelled as the responder's estimate. Distances are straight-line, with no computed driving ETA. Role views filter the console: hospital sees medical and accident, police sees accident, mechanic sees breakdown, fuel pump sees fuel.
-
+Accept links use 128-bit random tokens, stored only as SHA-256 hashes, valid for 2 hours. Input is validated (category, trigger, coordinates, crash data). Only alert creation is rate limited (30 per minute per IP), never polling. `X-Content-Type-Options`, `Permissions-Policy` and `Referrer-Policy: strict-origin-when-cross-origin` are set (OpenStreetMap tile servers refuse requests without a referrer). No secrets are needed or stored. Demo-only endpoints (console actions, reset, duty) are disabled when `DEMO_MODE=false`.

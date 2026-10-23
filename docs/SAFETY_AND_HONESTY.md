@@ -15,8 +15,8 @@ RakshaLink touches emergencies, so we hold ourselves to strict rules.
 - Background sensing is limited on mobile operating systems. The prototype runs as a foreground Drive Mode.
 - Morse flashing alerts people nearby; it does not reach a responder.
 - SMS fallback needs the user to tap Send. Phones do not allow silent background SMS.
-- Responder data comes from OpenStreetMap and may be incomplete. Real responder onboarding is future work.
-- Carrier rules (for example SMS registration in India) can delay real SMS delivery.
+- Responders in this build are sample data placed around two demo locations. Real responder onboarding is future work.
+- SMS and voice dispatch are simulated. No message is sent to any real number.
 
 ## False alarms
 Every auto-alert has a 20-second countdown with an alarm and a large cancel button. A production system would also call the rider first before alerting responders.

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RakshaLink · Live demo</title>
+<meta name="description" content="Highway emergency triage: the right responder, found fast, even offline.">
+<link rel="icon" href="/assets/emblem.svg">
+<link rel="stylesheet" href="/shared/tokens.css">
+<style>
+html,body{height:100%}body{display:flex;flex-direction:column;overflow:hidden}
+.bar{background:var(--green);color:var(--cream);display:flex;align-items:center;gap:18px;padding:10px 24px;min-height:76px;flex-wrap:wrap;flex:none}
+.bar .b{display:flex;align-items:center;gap:12px}.bar img{width:44px;height:44px;border-radius:12px}.bar b{font:600 24px var(--serif);display:block;line-height:1}.bar small{font-size:12.5px;opacity:.8}
+.tabs{display:flex;gap:8px;margin:0 auto;flex-wrap:wrap;justify-content:center}
+.tabs button{font:600 15px var(--sans);border:1px solid rgba(245,243,234,.35);background:transparent;color:var(--cream);border-radius:999px;padding:9px 18px;cursor:pointer}
+.tabs button.on{background:var(--cream);color:var(--green);border-color:var(--cream)}
+.tabs button:focus-visible,.acts button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.acts{display:flex;gap:8px}.acts button{font:600 14px var(--sans);border:1px solid rgba(245,243,234,.35);background:rgba(245,243,234,.1);color:var(--cream);border-radius:12px;padding:9px 14px;cursor:pointer}
+main{flex:1;min-height:0;position:relative}
+.pane{position:absolute;inset:0;display:flex;gap:24px;justify-content:center;align-items:flex-start;padding:18px 24px;overflow:auto}
+.pane[hidden]{display:none}
+.phone{flex:none;width:min(412px,100%);height:min(860px,calc(100vh - 76px - 36px));border:10px solid var(--ink);border-radius:46px;overflow:hidden;background:var(--bg);box-shadow:0 26px 54px -26px rgba(28,42,18,.55)}
+.cons{flex:1;min-width:0;height:calc(100vh - 76px - 36px);border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--bg);box-shadow:0 26px 54px -30px rgba(28,42,18,.4)}
+.full{width:100%;height:100%;border:0;border-radius:20px;background:var(--bg)}
+.phone iframe,.cons iframe{width:100%;height:100%;border:0;display:block}
+.cap{position:absolute;bottom:4px;left:0;right:0;text-align:center;font:700 11.5px var(--sans);letter-spacing:.1em;color:var(--mute);pointer-events:none}
+#p_rider{align-items:center;gap:40px}
+.side{max-width:360px}.side h2{font-size:28px;line-height:1.15;margin-bottom:12px}.side p{color:var(--mute);margin-bottom:10px}
+dialog{border:0;border-radius:24px;padding:28px 30px;max-width:560px;width:92%;background:var(--surface);color:var(--ink);box-shadow:0 30px 70px -20px rgba(0,0,0,.5)}
+dialog::backdrop{background:rgba(28,42,18,.55)}dialog h2{font-size:26px;margin-bottom:14px}dialog ol{margin:0 0 18px 20px;display:grid;gap:10px}
+@media (max-width:1179px){.pane{flex-direction:column;align-items:center}.cons{width:100%}#tl{display:none}}
+#m{display:none;flex:1;min-height:0;overflow:auto;padding:20px;flex-direction:column;gap:14px}
+#m a{display:block;padding:20px 22px;text-decoration:none;color:var(--ink)}#m b{font:600 22px var(--serif);display:block;margin-bottom:4px}#m span{color:var(--mute);font-size:15px}
+@media (max-width:700px){.bar{padding:12px 16px;min-height:0}.tabs,.acts,main{display:none}#m{display:flex}}
+</style></head>
+<body>
+<header class="bar">
+ <div class="b"><img src="/assets/emblem.svg" alt=""><div><b>RakshaLink</b><small>Help, when you need it most.</small></div></div>
+ <nav class="tabs" role="tablist" aria-label="Demo views">
+  <button role="tab" id="tl" data-t="live">Live demo</button><button role="tab" data-t="rider">Rider app (receiver)</button><button role="tab" data-t="console">Responder console</button><button role="tab" data-t="sim">3D simulation</button>
+ </nav>
+ <div class="acts"><button id="how">How to demo</button><button id="reset">Reset demo</button></div>
+</header>
+<main>
+ <section class="pane" id="p_live" hidden><div class="phone"><iframe data-src="/rider" title="Rider app"></iframe></div><div class="cons"><iframe data-src="/console" title="Responder console"></iframe></div></section>
+ <section class="pane" id="p_rider" hidden><div class="phone"><iframe data-src="/rider" title="Rider app"></iframe></div>
+  <aside class="side"><span class="demo" style="display:inline-block;margin-bottom:14px">DEMO · SIMULATED DISPATCH</span><h2>The receiver side</h2><p>This is what the person in trouble sees. Tap an emergency, or use Drive Mode to simulate a crash.</p><p>Open the <b>Responder console</b> tab (or <a href="/console" target="_blank" rel="noopener">a new window</a>) to answer it.</p><p style="font-size:13px">Responders are sample data. In a real emergency call 112.</p></aside></section>
+ <section class="pane" id="p_console" hidden><iframe class="full" data-src="/console" title="Responder console"></iframe></section>
+ <section class="pane" id="p_sim" hidden style="padding:0"><iframe class="full" data-src="/simulation/" title="3D simulation" style="border-radius:0"></iframe></section>
+</main>
+<div id="m"><span class="demo" style="align-self:flex-start">DEMO · SIMULATED DISPATCH</span><a class="card" href="/rider"><b>Rider app</b><span>The receiver: tap an emergency, simulate a crash, go offline.</span></a><a class="card" href="/console"><b>Responder console</b><span>Hospitals, police, mechanics and fuel pumps answer the alert.</span></a><a class="card" href="/simulation/"><b>3D simulation</b><span>The crash, the offline relay concept and the help response.</span></a><p class="muted" style="font-size:13px">Responders are sample data and dispatch is simulated. In a real emergency call 112.</p></div>
+<dialog id="dlg"><h2>How to run the demo</h2><ol>
+ <li>Open <b>Live demo</b>. On the phone, tap <b>Medical SOS</b>. The alert appears in the console.</li>
+ <li>In the console press <b>Accept alert</b>, then <b>On my way</b>, <b>Arrived</b>, <b>Resolved</b>. The phone shows only these real steps.</li>
+ <li>On the phone press <b>Simulate crash</b>. After the 20 second countdown an automatic Accident alert goes to a hospital and the police.</li>
+ <li>Leave an alert alone for 20 seconds: it escalates to the next-nearest responder.</li>
+ <li>Offline: under Demo tools tick "Pretend there is no signal", tap an emergency, watch the Morse flash, then untick to deliver it.</li>
+ <li>Open <b>3D simulation</b> for the crash, relay and help response.</li></ol>
+ <p class="muted" style="font-size:13px;margin-bottom:16px">Responders are sample data and dispatch is simulated. In a real emergency call 112.</p>
+ <button class="btn primary" id="close">Got it</button></dialog>
+<script>
+(function () {
+  const tabs = [...document.querySelectorAll('.tabs button')], wide = innerWidth >= 1180;
+  if (!wide) document.getElementById('tl').style.display = 'none';
+  function show(t) {
+    if (t === 'live' && !wide) t = 'rider';
+    tabs.forEach(b => { b.classList.toggle('on', b.dataset.t === t); b.setAttribute('aria-selected', b.dataset.t === t); });
+    ['live', 'rider', 'console', 'sim'].forEach(k => { const p = document.getElementById('p_' + k); p.hidden = k !== t; if (k === t) p.querySelectorAll('iframe[data-src]').forEach(f => { if (!f.src || f.src === 'about:blank' || !f.getAttribute('src')) f.src = f.dataset.src; }); });
+    try { history.replaceState(null, '', '#' + t); } catch (e) { }
+  }
+  tabs.forEach(b => b.onclick = () => show(b.dataset.t));
+  const h = location.hash.slice(1); show(['live', 'rider', 'console', 'sim'].includes(h) ? h : (wide ? 'live' : 'rider'));
+  const dlg = document.getElementById('dlg');
+  document.getElementById('how').onclick = () => dlg.showModal(); document.getElementById('close').onclick = () => dlg.close();
+  document.getElementById('reset').onclick = async () => {
+    try { await fetch('/api/dev/reset', { method: 'POST' }); } catch (e) { }
+    try { localStorage.removeItem('rl_queue'); } catch (e) { }
+    document.querySelectorAll('iframe[src]').forEach(f => { f.src = f.getAttribute('src'); });
+  };
+})();
+</script></body></html>

@@ -1,251 +1,86 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-  <title>RakshaLink Responder</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Serif:wght@600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #EFEBDD;
-      --surface: #FBF9F2;
-      --ink: #1C2A12;
-      --mute: #5E6B57;
-      --line: rgba(39,71,6,0.14);
-      --green: #274706;
-      --teal: #1B4D4F;
-      --navy: #2B3A67;
-      --maroon: #5B1F2D;
-      --amber: #D9B25C;
-      --error: #ba1a1a;
-      --font-serif: 'Noto Serif', Georgia, serif;
-      --font-sans: 'DM Sans', system-ui, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { 
-      margin: 0; 
-      padding: 16px; 
-      font-family: var(--font-sans); 
-      background: var(--bg); 
-      color: var(--ink);
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-    }
-    .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
-    
-    header { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 8px; }
-    .logo-icon { width: 24px; height: 24px; background: var(--green); color: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 10px;}
-    .header-text { font-size: 16px; font-weight: 700; color: var(--ink); display: flex; gap: 6px; }
-    .header-sub { color: var(--mute); font-weight: 500; }
-    
-    .demo-banner { background: var(--amber); color: #000; font-weight: 700; padding: 6px 12px; border-radius: 99px; font-size: 11px; text-align: center; letter-spacing: 0.5px; margin-bottom: 8px; }
-    
-    .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid var(--line); }
-    .overline { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--mute); margin-bottom: 12px; letter-spacing: 1px; }
-    
-    .hero { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 16px; }
-    .hero-icon { width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; color: white; margin-bottom: 12px; font-size: 20px;}
-    .hero-title { font-family: var(--font-serif); font-size: 26px; margin: 0 0 8px 0; color: var(--ink); }
-    .chip { background: #eef2f6; color: var(--navy); font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: 700; display: inline-block;}
-    
-    .crash-box { background: rgba(43, 58, 103, 0.08); border-left: 4px solid var(--navy); padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 16px; text-align: left; }
-    .crash-box h4 { margin: 0 0 4px 0; color: var(--navy); font-size: 14px; }
-    .crash-box p { margin: 0 0 4px 0; font-size: 13px; color: var(--mute); }
-    .crash-box .unresponsive { font-weight: 700; color: var(--error); margin-bottom: 4px; }
-    .crash-box .sample-tag { font-size: 10px; opacity: 0.7; background: rgba(0,0,0,0.1); padding: 2px 4px; border-radius: 4px; margin-left: 4px; }
-
-    .loc-card { text-align: left; margin-bottom: 16px; }
-    .loc-card h4 { margin: 0 0 4px 0; font-size: 14px; color: var(--ink); }
-    .loc-card p { margin: 0 0 12px 0; font-size: 14px; color: var(--mute); }
-    .dist-val { font-size: 20px; font-weight: 700; color: var(--ink); }
-
-    .btn { padding: 16px; border-radius: 12px; border: none; font-weight: 700; font-size: 16px; cursor: pointer; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: var(--font-sans); }
-    .btn-white { background: #fff; color: var(--ink); border: 1px solid var(--line); }
-    .btn-green { background: var(--green); color: white; }
-    .btn-outline-red { border: 2px solid var(--error); color: var(--error); background: transparent; }
-    .btn-disabled { background: #e0e4db; color: var(--mute); cursor: not-allowed; }
-
-    .countdown-box { background: rgba(186, 26, 26, 0.08); color: var(--error); padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 14px; margin: 16px 0; border: 1px solid rgba(186,26,26,0.1); }
-    
-    .status-banner { padding: 12px; border-radius: 8px; text-align: center; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .status-banner.green { background: #e2f4cf; color: var(--green); }
-    
-    .progress-card { background: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--line); }
-    .p-step { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; color: var(--mute); font-weight: 500; }
-    .p-step:last-child { margin-bottom: 0; }
-    .p-step.checked { color: var(--ink); }
-    .p-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #ccc; display: flex; align-items: center; justify-content: center; }
-    .p-step.checked .p-icon { border-color: var(--green); background: var(--green); }
-    .p-step.checked .p-icon::after { content: '✓'; color: white; font-size: 12px; }
-
-    .input-field { width: 100%; padding: 16px; border: 1px solid var(--line); border-radius: 12px; font-size: 15px; margin-bottom: 16px; box-sizing: border-box; font-family: var(--font-sans); }
-    
-    footer { text-align: center; font-size: 12px; color: var(--mute); margin-top: 16px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="demo-banner">DEMO · SIMULATED RESPONDER NETWORK</div>
-    <header>
-      <div class="logo-icon">RL</div>
-      <div class="header-text">RakshaLink <span class="header-sub">Responder</span></div>
-    </header>
-    
-    <div id="content" style="width: 100%;">
-      <div style="text-align:center; padding: 40px; color: var(--mute);">Loading...</div>
-    </div>
-    
-    <footer>Opened from an SMS link. No app needed.</footer>
-  </div>
-
-  <script>
-    const COLORS = { medical: 'var(--maroon)', accident: 'var(--navy)', breakdown: 'var(--teal)', fuel: 'var(--green)' };
-    const TITLES = { medical: 'Medical SOS', accident: 'Road Accident', breakdown: 'Vehicle Breakdown', fuel: 'Fuel Shortage' };
-    const ICONS = { medical: '✚', accident: '🚗', breakdown: '🔧', fuel: '⛽' };
-
-    const token = window.location.pathname.split('/').pop();
-    let state = null;
-    let dispatch = null;
-
-    async function fetchData() {
-      const res = await fetch(`/api/r/${token}`);
-      if (res.status === 403) {
-        document.getElementById('content').innerHTML = `
-          <div class="card" style="text-align:center; padding: 40px 20px;">
-            <div style="font-size:32px; margin-bottom:12px;">⚠️</div>
-            <h2 style="font-family:var(--font-serif); color:var(--ink); margin:0 0 8px 0;">Link Expired</h2>
-            <p style="color:var(--mute); margin:0; font-size:14px;">This alert has been handled or escalated.</p>
-          </div>`;
-        return;
-      }
-      const data = await res.json();
-      state = data.event;
-      dispatch = data.dispatch;
-      render();
-    }
-
-    function render() {
-      if (!state) return;
-      const ev = state;
-      let uiState = 'S0';
-      if (ev.steps.resolved) uiState = 'S4';
-      else if (ev.steps.arrived) uiState = 'S3';
-      else if (ev.steps.enroute) uiState = 'S2';
-      else if (ev.steps.accepted) uiState = 'S1';
-      else if (ev.steps.unanswered) uiState = 'Expired';
-
-      if (uiState === 'Expired') {
-        document.getElementById('content').innerHTML = `
-          <div class="card" style="text-align:center; padding: 40px 20px;">
-            <h2 style="font-family:var(--font-serif); color:var(--ink); margin:0 0 8px 0;">Alert Closed</h2>
-            <p style="color:var(--mute); margin:0; font-size:14px;">This alert was escalated or closed.</p>
-          </div>`;
-        return;
-      }
-
-      const color = COLORS[ev.category];
-      const distText = dispatch ? `${(dispatch.distance_m/1000).toFixed(1)} km` : 'Distance unknown';
-
-      let html = `<div class="card" style="margin-bottom:16px;">`;
-      
-      if (uiState === 'S0') {
-        html += `<div class="overline">Incoming Alert</div>`;
-      } else if (uiState === 'S1') {
-        html += `<div class="status-banner green">✓ Alert accepted</div>`;
-      } else if (uiState === 'S2') {
-        html += `<div class="status-banner green">On the way</div>`;
-      } else if (uiState === 'S3') {
-        html += `<div class="status-banner green">Arrived</div>`;
-      } else if (uiState === 'S4') {
-        html += `<div class="status-banner green">✓ Resolved</div>`;
-      }
-
-      html += `
-        <div class="hero">
-          <div class="hero-icon" style="background:${color}">${ICONS[ev.category]}</div>
-          <h2 class="hero-title">${TITLES[ev.category]}</h2>
-          ${ev.trigger === 'crash_auto' ? `<div class="chip">Automatic crash</div>` : ''}
-        </div>
-      `;
-
-      if (ev.trigger === 'crash_auto') {
-        html += `
-        <div class="crash-box">
-          <h4>Automatic crash alert</h4>
-          <p>Hard impact and sudden stop detected.</p>
-          <div class="unresponsive">Victim may be unresponsive.</div>
-          <p>Peak impact ${ev.peak_g} g • Speed before ${ev.pre_impact_kmh} km/h <span class="sample-tag">sample</span></p>
-        </div>`;
-      }
-
-      html += `
-        <div class="loc-card">
-          <h4>Victim location</h4>
-          <p>GNIT campus, Sodepur (demo)</p>
-          <div class="dist-val">${distText} <span style="font-size:13px; font-weight:400; color:var(--mute);">straight-line</span></div>
-        </div>
-        <button class="btn btn-white" onclick="window.open('https://www.openstreetmap.org/?mlat=${ev.lat}&mlon=${ev.lng}#map=15/${ev.lat}/${ev.lng}')">Open in Maps ↗</button>
-      </div>`;
-
-      if (uiState === 'S0') {
-        html += `
-          <div class="countdown-box">Escalates to the next responder in <span style="color:red">00:20</span></div>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <button class="btn btn-green" onclick="action('accept')">✓ Accept alert</button>
-            <button class="btn btn-outline-red" onclick="action('decline')">Can't respond</button>
-          </div>
-        `;
-      } else {
-        html += `
-          <div class="progress-card">
-            <h4 style="margin:0 0 16px 0; font-size:14px; color:var(--ink);">Response progress</h4>
-            <div class="p-step checked"><div class="p-icon"></div> Notified</div>
-            <div class="p-step ${ev.steps.accepted?'checked':''}"><div class="p-icon"></div> Accepted</div>
-            <div class="p-step ${ev.steps.enroute?'checked':''}"><div class="p-icon"></div> On the way</div>
-            <div class="p-step ${ev.steps.arrived?'checked':''}"><div class="p-icon"></div> Arrived</div>
-            <div class="p-step ${ev.steps.resolved?'checked':''}"><div class="p-icon"></div> Resolved</div>
-          </div>
-        `;
-
-        if (uiState === 'S1') {
-          html += `
-            <input type="number" id="eta" class="input-field" placeholder="Your estimate (optional) - e.g. 8 min">
-            <button class="btn btn-green" onclick="action('status', 'enroute')">🚗 On my way</button>
-          `;
-        } else if (uiState === 'S2') {
-          html += `<button class="btn btn-green" onclick="action('status', 'arrived')">📍 Arrived</button>`;
-        } else if (uiState === 'S3') {
-          html += `<button class="btn btn-green" onclick="action('status', 'resolved')">✓ Resolved</button>`;
-        } else if (uiState === 'S4') {
-          html += `
-            <button class="btn btn-disabled" disabled>✓ Resolved</button>
-            <button class="btn btn-white" style="margin-top:12px;" disabled>Back to alerts</button>
-          `;
-        }
-      }
-      document.getElementById('content').innerHTML = html;
-    }
-
-    async function action(type, step = null) {
-      const b = event.target; b.style.opacity = '0.5';
-      if (type === 'accept' || type === 'decline') {
-        await fetch(`/api/r/${token}/${type}`, { method: 'POST' });
-      } else if (type === 'status') {
-        const payload = { step };
-        if (step === 'enroute') {
-          const eta = document.getElementById('eta').value;
-          if (eta) payload.eta_minutes = parseInt(eta);
-        }
-        await fetch(`/api/r/${token}/status`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-      }
-      fetchData();
-    }
-
-    fetchData();
-    setInterval(fetchData, 3000);
-  </script>
-</body>
-</html>
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RakshaLink · Responder alert</title>
+<link rel="icon" href="/assets/emblem.svg">
+<link rel="stylesheet" href="/shared/tokens.css">
+<style>
+body{display:flex;justify-content:center}
+#app{width:100%;max-width:440px;min-height:100vh;padding:18px 18px 32px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:10px}.top b{font:600 20px var(--serif);display:block;line-height:1}.top small{color:var(--mute);font-size:12px}
+.over{font:700 11px var(--sans);letter-spacing:.14em;color:var(--mute)}
+.banner{display:flex;gap:10px;align-items:center;background:var(--gtint);color:var(--green);border-radius:10px;padding:12px 14px;font:700 15px var(--sans)}
+.banner.gray{background:var(--disabled);color:var(--mute)}
+.crash{background:var(--ntint);border:1px solid rgba(43,58,103,.25);border-radius:12px;padding:12px 14px;font-size:13px}.crash h4{font:700 13px var(--sans);color:var(--navy);margin-bottom:4px}
+.crash small{display:block;color:var(--mute);margin-top:6px;font-size:11.5px}
+.pad{padding:14px}.pad small{color:var(--mute);display:block;font-size:11.5px}
+.cd{display:flex;align-items:center;justify-content:space-between;background:#FBEDEB;border:1px solid rgba(186,26,26,.35);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--mute)}.cd b{font:600 30px var(--serif);color:var(--err)}
+.steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:12px;align-items:center;color:var(--mute);font:500 14px var(--sans)}.steps li::before{content:"";width:20px;height:20px;border-radius:50%;border:2px solid rgba(94,107,87,.5);background:var(--surface);flex:none}
+.steps li.done{color:var(--ink);font-weight:700}.steps li.done::before{border-color:var(--green);background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5F3EA' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/14px no-repeat}
+.inp{width:100%;border:1px solid rgba(39,71,6,.2);border-radius:8px;padding:12px;font:400 14px var(--sans);background:var(--surface);margin-top:6px}
+.note{font-size:11.5px;color:var(--mute);text-align:center}
+.err{text-align:center;padding:60px 20px}.err h1{font-size:24px;margin:14px 0 6px}
+</style></head>
+<body><div id="app"><div class="top" id="hdr"></div><div class="demo">DEMO · SIMULATED RESPONDER NETWORK</div><div id="body"></div><p class="note">Opened from an SMS link. No app needed.</p></div>
+<script src="/shared/common.js"></script>
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id), RL = window.RL, ic = RL.ic, esc = RL.esc;
+const token = location.pathname.split('/').pop();
+let D = null, off = 0, eta = '', busy = false;
+$('hdr').innerHTML = RL.shield('#274706', '#F5F3EA', 40) + '<div><b>RakshaLink</b><small>Responder</small></div>';
+function stateOf(m, e) {
+  if (m.status === 'declined') return 'declined'; if (m.status === 'missed') return 'missed';
+  if (e.steps.unanswered && !m.accepted_at) return 'closed';
+  if (m.resolved_at) return 'S4'; if (m.arrived_at) return 'S3'; if (m.enroute_at) return 'S2'; if (m.accepted_at) return 'S1';
+  return 'S0';
+}
+async function load() {
+  try { D = await RL.api('/api/r/' + encodeURIComponent(token), { timeout: 5000 }); off = D.server_now - Date.now(); draw(); }
+  catch (e) { if (e.status === 403) { clearInterval(poll); $('body').innerHTML = `<div class="err">${RL.shield('#5E6B57', '#F5F3EA', 56)}<h1>This link is not valid</h1><p class="muted">It is wrong or has expired. Ask for a new alert.</p></div>`; } }
+}
+function draw() {
+  const e = D.event, m = D.my, st = stateOf(m, e), c = RL.CAT[e.category];
+  const bn = { S1: 'Alert accepted', S2: 'On the way', S3: 'Arrived', S4: 'Resolved' }[st];
+  const gray = { missed: 'This alert was escalated to the next responder because there was no response in time.', declined: 'You declined this alert. It was passed on.', closed: 'No responder answered. The rider was told to call 112.' }[st];
+  let h = '';
+  if (bn) h += `<div class="banner">${ic('check', 20)} ${bn}</div>`; else if (gray) h += `<div class="banner gray">${gray}</div>`; else h += '<div class="over">INCOMING ALERT</div>';
+  h += `<div style="display:flex;gap:12px;align-items:center"><span class="disc ${c.color}">${ic(c.icon, 22)}</span><div><h1 style="font-size:24px;line-height:1.1">${esc(e.label)}</h1><div style="margin-top:4px">${e.trigger === 'crash_auto' ? '<span class="chip navy">Automatic crash</span>' : '<span class="chip">Manual</span>'}</div></div></div><p class="muted" style="font-size:13px">You are responding as <b>${esc(D.responder.name)}</b></p>`;
+  if (e.trigger === 'crash_auto' && st === 'S0') h += `<div class="crash"><h4>Automatic crash alert</h4>Hard impact and sudden stop detected.<br><b>Victim may be unresponsive.</b>${e.peak_g != null ? `<small>Peak impact ${e.peak_g} g · Speed before impact ${e.pre_impact_kmh} km/h (sample values)</small>` : ''}</div>`;
+  if (['S1', 'S2', 'S3', 'S4'].includes(st)) {
+    const dn = { Notified: true, Accepted: !!m.accepted_at, 'On the way': !!m.enroute_at, Arrived: !!m.arrived_at, Resolved: !!m.resolved_at };
+    h += `<div class="card pad"><h3 style="font-size:15px;margin-bottom:12px">Response progress</h3><ul class="steps">${Object.keys(dn).map(k => `<li class="${dn[k] ? 'done' : ''}">${k}</li>`).join('')}</ul></div>`;
+  }
+  const mapUrl = 'https://www.openstreetmap.org/?mlat=' + e.lat + '&mlon=' + e.lng + '#map=16/' + e.lat + '/' + e.lng;
+  h += `<div class="card pad"><div style="display:flex;gap:10px">${ic('pin', 20, 'var(--navy)')}<div><small>Victim location</small><b>${e.lat.toFixed(4)}° N, ${e.lng.toFixed(4)}° E</b><small>${RL.km(m.distance_m)} straight-line</small></div></div><a class="btn white block" style="margin-top:10px;min-height:42px" href="${mapUrl}" target="_blank" rel="noopener">Open in Maps ${ic('ext', 15)}</a></div>`;
+  if (st === 'S0') {
+    h += `<div class="cd"><span>Escalates to the next<br>responder in</span><b id="cdv">--:--</b></div><button class="btn primary block" id="go" style="min-height:54px;font-size:16px">${ic('check', 18)} Accept alert</button><button class="btn danger block" id="no">Can't respond</button>`;
+  } else if (['S1', 'S2', 'S3'].includes(st)) {
+    const nx = { S1: ['enroute', 'On my way', 'car'], S2: ['arrived', 'Arrived', 'pin'], S3: ['resolved', 'Resolved', 'check'] }[st];
+    h += `<div><label class="muted" style="font-size:12px" for="eta">Your estimate in minutes (optional)</label><input class="inp" id="eta" type="number" min="1" max="180" inputmode="numeric" placeholder="e.g. 8. Shown to the caller as your estimate." value="${esc(eta || m.eta_minutes || '')}"><button class="btn white block" id="etaGo" style="margin-top:8px;min-height:40px">Update estimate</button></div><button class="btn primary block" id="go" data-s="${nx[0]}" style="min-height:54px;font-size:16px">${ic(nx[2], 18)} ${nx[1]}</button>`;
+  } else if (st === 'S4') {
+    h += `<button class="btn block" disabled>${ic('check', 18)} Resolved</button><a class="btn ghost block" href="/console">Back to alerts</a>`;
+  }
+  const el = document.activeElement; if (el && el.id === 'eta') { eta = el.value; return tick(); }
+  $('body').innerHTML = `<div style="display:flex;flex-direction:column;gap:14px">${h}</div>`;
+  bind(st); tick();
+}
+function bind(st) {
+  const go = $('go');
+  if (st === 'S0') { go.onclick = () => post('accept'); $('no').onclick = () => post('decline'); }
+  else if (go && go.dataset.s) go.onclick = () => post('status', { step: go.dataset.s, eta_minutes: $('eta').value ? Number($('eta').value) : undefined });
+  if ($('etaGo')) $('etaGo').onclick = () => { const v = $('eta').value; if (v) post('status', { eta_minutes: Number(v) }); };
+  if ($('eta')) $('eta').oninput = e => { eta = e.target.value; };
+}
+async function post(p, body) {
+  if (busy) return; busy = true;
+  try { await RL.api('/api/r/' + encodeURIComponent(token) + '/' + p, { method: 'POST', body: body || {} }); eta = ''; } catch (e) { alert('Could not do that: ' + e.message); }
+  busy = false; load();
+}
+function tick() { const el = $('cdv'); if (el && D && D.my.escalate_at) el.textContent = RL.mmss((D.my.escalate_at - (Date.now() + off)) / 1000); }
+const poll = setInterval(load, 2000); setInterval(tick, 500); load();
+})();
+</script></body></html>

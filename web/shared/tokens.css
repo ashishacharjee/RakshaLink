@@ -1,0 +1,36 @@
+/* RakshaLink "Warm Calm Light" tokens (docs/DESIGN_TOKENS.md). Fonts are bundled, so nothing depends on a CDN. */
+@font-face{font-family:'DM Sans';font-weight:400;font-display:swap;src:url(/vendor/fonts/dm-sans-400.woff2) format('woff2')}
+@font-face{font-family:'DM Sans';font-weight:500;font-display:swap;src:url(/vendor/fonts/dm-sans-500.woff2) format('woff2')}
+@font-face{font-family:'DM Sans';font-weight:700;font-display:swap;src:url(/vendor/fonts/dm-sans-700.woff2) format('woff2')}
+@font-face{font-family:'Noto Serif';font-weight:600;font-display:swap;src:url(/vendor/fonts/noto-serif-600.woff2) format('woff2')}
+:root{--bg:#EFEBDD;--surface:#FBF9F2;--ink:#1C2A12;--mute:#5E6B57;--line:rgba(39,71,6,.14);--green:#274706;--teal:#1B4D4F;--navy:#2B3A67;--maroon:#5B1F2D;--purple:#3D2A5C;--cream:#F5F3EA;--amber:#D9B25C;--err:#BA1A1A;--tint:#E2F4CF;--ntint:#E8ECF6;--gtint:#DCEBD6;--disabled:#E7E3D4;--chip:#ECE9DC;
+--serif:'Noto Serif',Georgia,'Times New Roman',serif;--sans:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg) radial-gradient(900px 420px at 50% -10%,rgba(39,71,6,.14),transparent) no-repeat;color:var(--ink);font:400 16px/1.5 var(--sans);-webkit-text-size-adjust:100%}
+h1,h2,h3,.serif{font-family:var(--serif);font-weight:600}
+[hidden]{display:none!important}
+button{font-family:inherit}
+svg.i{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:0 10px 30px -22px rgba(28,42,18,.45)}
+.btn{font:700 16px var(--sans);border-radius:14px;border:0;padding:14px 18px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center;text-decoration:none;min-height:48px;transition:transform .12s}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn.primary{background:var(--green);color:var(--cream)}
+.btn.danger{background:transparent;border:1.5px solid var(--err);color:var(--err)}
+.btn.ghost{background:transparent;border:1.5px solid rgba(39,71,6,.28);color:var(--ink)}
+.btn.white{background:var(--surface);border:1px solid rgba(39,71,6,.2);color:var(--ink)}
+.btn.red{background:var(--err);color:#fff}
+.btn.cream{background:var(--cream);color:#3a1018}
+.btn.block{display:flex;width:100%}
+.btn:disabled{background:var(--disabled);color:rgba(94,107,87,.65);border:0;cursor:not-allowed}
+.btn:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 11px;font:700 12px var(--sans);background:var(--chip);color:var(--mute);white-space:nowrap}
+.chip.navy{background:#DDE3F2;color:var(--navy)}.chip.green{background:var(--gtint);color:var(--green)}.chip.maroon{background:#EAD9DD;color:var(--maroon)}.chip.teal{background:#D5E6E6;color:var(--teal)}.chip.amber{background:var(--amber);color:#261A00}.chip.err{background:#FBEDEB;color:var(--err)}
+.dot{width:8px;height:8px;border-radius:50%;background:#3E8A4E;display:inline-block}
+.demo{background:var(--amber);color:#261A00;font:700 11px var(--sans);letter-spacing:.06em;text-align:center;border-radius:999px;padding:5px 12px}
+.disc{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none;font-size:22px}
+.disc.green{background:var(--green)}.disc.teal{background:var(--teal)}.disc.navy{background:var(--navy)}.disc.maroon{background:var(--maroon)}
+.muted{color:var(--mute)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

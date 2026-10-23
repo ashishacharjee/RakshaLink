@@ -1,52 +1,266 @@
 [
-  {
-    "id": "hosp_1",
-    "name": "Sample City Hospital",
-    "type": "hospital",
-    "lat": 22.7001,
-    "lng": 88.3800,
-    "phone": "+910000000001",
-    "is_demo": true,
-    "on_duty": true
-  },
-  {
-    "id": "hosp_2",
-    "name": "Sample District Hospital",
-    "type": "hospital",
-    "lat": 22.6900,
-    "lng": 88.3700,
-    "phone": "+910000000002",
-    "is_demo": true,
-    "on_duty": true
-  },
-  {
-    "id": "pol_1",
-    "name": "Sample Highway Police",
-    "type": "police",
-    "lat": 22.6980,
-    "lng": 88.3750,
-    "phone": "+910000000003",
-    "is_demo": true,
-    "on_duty": true
-  },
-  {
-    "id": "mech_1",
-    "name": "Sample Auto Garage",
-    "type": "mechanic",
-    "lat": 22.7050,
-    "lng": 88.3850,
-    "phone": "+910000000004",
-    "is_demo": true,
-    "on_duty": true
-  },
-  {
-    "id": "fuel_1",
-    "name": "Sample Fuel Pump",
-    "type": "fuel_pump",
-    "lat": 22.6850,
-    "lng": 88.3650,
-    "phone": "+910000000005",
-    "is_demo": true,
-    "on_duty": true
-  }
+ {
+  "id": "ca_ho1",
+  "name": "Sample City Hospital",
+  "type": "hospital",
+  "lat": 22.72403,
+  "lng": 88.40512,
+  "phone": "+910000000001",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_ho2",
+  "name": "Sample Rural Hospital",
+  "type": "hospital",
+  "lat": 22.64186,
+  "lng": 88.3998,
+  "phone": "+910000000002",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_ho3",
+  "name": "Sample District Hospital",
+  "type": "hospital",
+  "lat": 22.70929,
+  "lng": 88.29143,
+  "phone": "+910000000003",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_po1",
+  "name": "Sample Highway Police",
+  "type": "police",
+  "lat": 22.66299,
+  "lng": 88.36613,
+  "phone": "+910000000004",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_po2",
+  "name": "Sample Town Police",
+  "type": "police",
+  "lat": 22.73299,
+  "lng": 88.34433,
+  "phone": "+910000000005",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_po3",
+  "name": "Sample Outpost Police",
+  "type": "police",
+  "lat": 22.68259,
+  "lng": 88.45559,
+  "phone": "+910000000006",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_me1",
+  "name": "Sample Auto Garage",
+  "type": "mechanic",
+  "lat": 22.67981,
+  "lng": 88.4075,
+  "phone": "+910000000007",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_me2",
+  "name": "Sample Road Garage",
+  "type": "mechanic",
+  "lat": 22.67171,
+  "lng": 88.33491,
+  "phone": "+910000000008",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_me3",
+  "name": "Sample Highway Garage",
+  "type": "mechanic",
+  "lat": 22.76017,
+  "lng": 88.40448,
+  "phone": "+910000000009",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_fu1",
+  "name": "Sample Petrol Pump",
+  "type": "fuel_pump",
+  "lat": 22.70454,
+  "lng": 88.36107,
+  "phone": "+910000000010",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_fu2",
+  "name": "Sample Highway Pump",
+  "type": "fuel_pump",
+  "lat": 22.71488,
+  "lng": 88.41595,
+  "phone": "+910000000011",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "ca_fu3",
+  "name": "Sample Fuel Station",
+  "type": "fuel_pump",
+  "lat": 22.63305,
+  "lng": 88.3788,
+  "phone": "+910000000012",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "campus"
+ },
+ {
+  "id": "nh_ho1",
+  "name": "Sample NH Hospital",
+  "type": "hospital",
+  "lat": 23.28313,
+  "lng": 87.89953,
+  "phone": "+910000000013",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_ho2",
+  "name": "Sample Bypass Hospital",
+  "type": "hospital",
+  "lat": 23.20096,
+  "lng": 87.89418,
+  "phone": "+910000000014",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_ho3",
+  "name": "Sample Bardhaman Hospital",
+  "type": "hospital",
+  "lat": 23.26839,
+  "lng": 87.78537,
+  "phone": "+910000000015",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_po1",
+  "name": "Sample NH Police",
+  "type": "police",
+  "lat": 23.22209,
+  "lng": 87.86038,
+  "phone": "+910000000016",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_po2",
+  "name": "Sample Bypass Police",
+  "type": "police",
+  "lat": 23.29209,
+  "lng": 87.83848,
+  "phone": "+910000000017",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_po3",
+  "name": "Sample Toll Police",
+  "type": "police",
+  "lat": 23.24169,
+  "lng": 87.95021,
+  "phone": "+910000000018",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_me1",
+  "name": "Sample NH Garage",
+  "type": "mechanic",
+  "lat": 23.23891,
+  "lng": 87.90192,
+  "phone": "+910000000019",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_me2",
+  "name": "Sample Bypass Garage",
+  "type": "mechanic",
+  "lat": 23.23081,
+  "lng": 87.82903,
+  "phone": "+910000000020",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_me3",
+  "name": "Sample Toll Garage",
+  "type": "mechanic",
+  "lat": 23.31927,
+  "lng": 87.89889,
+  "phone": "+910000000021",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_fu1",
+  "name": "Sample NH Pump",
+  "type": "fuel_pump",
+  "lat": 23.26364,
+  "lng": 87.8553,
+  "phone": "+910000000022",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_fu2",
+  "name": "Sample Bypass Pump",
+  "type": "fuel_pump",
+  "lat": 23.27398,
+  "lng": 87.9104,
+  "phone": "+910000000023",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ },
+ {
+  "id": "nh_fu3",
+  "name": "Sample Toll Fuel Station",
+  "type": "fuel_pump",
+  "lat": 23.19215,
+  "lng": 87.8731,
+  "phone": "+910000000024",
+  "is_demo": true,
+  "on_duty": true,
+  "preset": "nh19"
+ }
 ]
