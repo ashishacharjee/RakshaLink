@@ -1,5 +1,11 @@
-# Deploy (Render)
+# Deploy
 
+**Live deployment:** [https://rakshalink-theta.vercel.app/](https://rakshalink-theta.vercel.app/)
+
+## Vercel
+The repository includes `vercel.json` and `api/index.js` for instant deployment on Vercel.
+
+## Render
 One web service, no database, no keys.
 
 1. Push the repository to GitHub.

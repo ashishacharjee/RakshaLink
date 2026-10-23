@@ -17,6 +17,10 @@
 </p>
 
 <p align="center">
+  <b>Live demo:</b> <a href="https://rakshalink-theta.vercel.app/"><b>https://rakshalink-theta.vercel.app/</b></a>
+</p>
+
+<p align="center">
   <a href="#run-it">Run it</a> &nbsp;·&nbsp;
   <a href="#the-interfaces">Interfaces</a> &nbsp;·&nbsp;
   <a href="#how-it-works">How it works</a> &nbsp;·&nbsp;
@@ -43,6 +47,8 @@ RakshaLink is built for that moment: one tap, or **no tap at all**.
 </table>
 
 ## Run it
+
+**Live demo:** [https://rakshalink-theta.vercel.app/](https://rakshalink-theta.vercel.app/)
 
 ```bash
 git clone https://github.com/ashishacharjee/RakshaLink.git
